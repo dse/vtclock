@@ -16,3 +16,12 @@ tar:
 		--exclude='*.o' \
 	)
 .PHONY: install tar
+
+.PHONY: ChangeLog
+ChangeLog: 
+	cvs2cl --stdout >$@
+
+.PHONY: clean
+clean:
+	/bin/rm -f vtclock *.o #*# .#* *~ .*~ *.bak
+
