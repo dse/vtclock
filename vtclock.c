@@ -18,8 +18,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <time.h>
+#include <ctype.h>
 
-#define VTCLOCK_DELAY 1
+#define VTCLOCK_BOUNCE 1
+
+/* VTCLOCK_INVERSE code is buggy right now. */
+#define VTCLOCK_INVERSE 0
 
 void 
 mydelay() 
@@ -40,6 +44,28 @@ mydelay()
     select(0,NULL,NULL,NULL,&timeout);
     prevsecs = secs;
   }
+}
+
+void
+vtclock_print_string(WINDOW *win, int y, int x,
+		     char *str)
+{
+  if (VTCLOCK_INVERSE)
+    {
+      char *p;
+      mvwin(win,y,x);
+      for (p = str; *p; ++p) {
+	if (iscntrl(*p)) {
+	  waddch(win,*p);
+	} else {
+	  waddch(win,' '|(isspace(*p)?A_NORMAL:A_REVERSE));
+	}
+      }
+    }
+  else
+    {
+      mvwprintw(win,y,x,str);
+    }
 }
 
 int
@@ -99,16 +125,16 @@ main() {
   while (1) {
     time(&t_time);
     tm_time = localtime(&t_time);
-    mvwprintw(h1, 0, 0, digits[tm_time->tm_hour / 10]);
-    mvwprintw(h2, 0, 0, digits[tm_time->tm_hour % 10]);
-    mvwprintw(m1, 0, 0, digits[tm_time->tm_min / 10]);
-    mvwprintw(m2, 0, 0, digits[tm_time->tm_min % 10]);
-    mvwprintw(s1, 0, 0, digits[tm_time->tm_sec / 10]);
-    mvwprintw(s2, 0, 0, digits[tm_time->tm_sec % 10]);
-    mvwprintw(c1, 0, 0, colon);
-    mvwprintw(c2, 0, 0, colon); 
+    vtclock_print_string(h1, 0, 0, digits[tm_time->tm_hour / 10]);
+    vtclock_print_string(h2, 0, 0, digits[tm_time->tm_hour % 10]);
+    vtclock_print_string(m1, 0, 0, digits[tm_time->tm_min / 10]);
+    vtclock_print_string(m2, 0, 0, digits[tm_time->tm_min % 10]);
+    vtclock_print_string(s1, 0, 0, digits[tm_time->tm_sec / 10]);
+    vtclock_print_string(s2, 0, 0, digits[tm_time->tm_sec % 10]);
+    vtclock_print_string(c1, 0, 0, colon);
+    vtclock_print_string(c2, 0, 0, colon); 
 
-    if (waitfor >= VTCLOCK_DELAY) {
+    if (waitfor >= VTCLOCK_BOUNCE) {
       /* erase old */
       mvwin(cld, y, x);
       wrefresh(cld);
