@@ -62,6 +62,12 @@
       vtclock_print_string(sw,0,0,config->type->colon); \
     } \
   } while(0)
+#define DRAW_BLANK_COLON(sw,type) \
+  do { \
+    if (sw) { \
+      vtclock_print_blank_version_of_string(sw,0,0,config->type->colon); \
+    } \
+  } while(0)
 
 typedef struct {
   vtclock_font *hour;
@@ -98,23 +104,42 @@ vtclock_config vtclock_config_3 = {
 static int vtclock_inverse = 0;
 
 void
-mydelay()
-     /* sleep until second changes.  does this by polling every
-      * 1/10 second.  close enough for government work. */
+small_sleep()
 {
   static struct timeval timeout;
-  static time_t prevsecs = (time_t)0;
-  time_t secs;
+  timeout.tv_sec = 0;
+  timeout.tv_usec = 50000;	/* 0.05 secs */
+  select(0,NULL,NULL,NULL,&timeout);
+}
+
+void
+mydelay()
+     /* sleep until second changes.  works via polling.  close enough
+        for government work. */
+{
+  static struct timeval prev;
+  static struct timeval curr;
+  gettimeofday(&prev, NULL);
   while (1) {
-    time(&secs);
-    if (prevsecs != secs) {
-      prevsecs = secs;
+    gettimeofday(&curr, NULL);
+    if (curr.tv_sec > prev.tv_sec)
       return;
-    }
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 100000;   /* 0.1 secs */
-    select(0,NULL,NULL,NULL,&timeout);
-    prevsecs = secs;
+    small_sleep();
+    prev = curr;
+  }
+}
+
+void
+mydelay_half()
+     /* sleep until the half-second mark.  also works via polling.
+        also close enough for government work. */
+{
+  static struct timeval curr;
+  while (1) {
+    gettimeofday(&curr, NULL);
+    if (curr.tv_usec >= 500000)
+      return;
+    small_sleep();
   }
 }
 
@@ -141,6 +166,20 @@ vtclock_print_string(WINDOW *win, int y, int x,
 }
 
 void
+vtclock_print_blank_version_of_string(WINDOW *win, int y, int x, char *str)
+{
+  char *p;
+  mvwin(win, y, x);
+  for (p = str; *p; ++p) {
+    if (iscntrl(*p)) {
+      waddch(win, *p);
+    } else {
+      waddch(win, ' ');
+    }
+  }
+}
+
+void
 usage() {
   fprintf(stderr,
           "usage: vtclock [option ...]\n"
@@ -151,6 +190,7 @@ usage() {
           "  -1, -2, -3, -4  select a font\n"
 	  "  -v  use inverse video for character drawing\n"
 	  "  -V  turn off inverse video\n"
+	  "  -k/-K  blinking colons on/off (default is off)\n"
           );
 }
 
@@ -175,7 +215,8 @@ main(int argc, char **argv) {
 
   int vtclock_bounce = 1;
   int vtclock_bounce_delay = 30;
-
+  int blinking_colons = 0;
+  
   {
     int ch;
     extern char *optarg;
@@ -184,8 +225,7 @@ main(int argc, char **argv) {
     extern int opterr;
     opterr = 1;
     optind = 1;
-    while ((ch = getopt(argc, argv, "hbBd:1234vV")) != -1) {
-
+    while ((ch = getopt(argc, argv, "hbBd:1234vVkK")) != -1) {
       switch (ch) {
       case 'h':
         usage();
@@ -217,12 +257,17 @@ main(int argc, char **argv) {
       case 'V':
 	vtclock_inverse = 0;
 	break;
+      case 'k':
+	blinking_colons = 1;
+	break;
+      case 'K':
+	blinking_colons = 0;
+	break;
       case '?':
       default:
         usage();
         exit(2);
       }
-
     }
   }
 
@@ -309,7 +354,16 @@ main(int argc, char **argv) {
 
     mvwin(cl,y,x);
     wnoutrefresh(cl);
-    refresh();
+    doupdate();
+    
+    if (blinking_colons) {
+      mydelay_half();
+      DRAW_BLANK_COLON(c1,colon1);
+      DRAW_BLANK_COLON(c2,colon2);
+      wnoutrefresh(cl);
+      doupdate();
+    }
+
     mydelay();
     ++waitfor;
   }
