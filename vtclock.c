@@ -260,12 +260,20 @@ main(int argc, char **argv) {
       case 'h':
         usage();
         exit(0);
+
       case 'c':
 	vtclock_char = optarg[0];
 	break;
       case 'C':
 	vtclock_char = 0;
 	break;
+      case 'v':
+	vtclock_inverse = 1;
+	break;
+      case 'V':
+	vtclock_inverse = 0;
+	break;
+
       case 'b':
         vtclock_bounce = 1;
         break;
@@ -293,12 +301,6 @@ main(int argc, char **argv) {
       case '5':
         config = &vtclock_config_4;
         break;
-      case 'v':
-	vtclock_inverse = 1;
-	break;
-      case 'V':
-	vtclock_inverse = 0;
-	break;
       case 'k':
 	blinking_colons = 1;
 	break;
