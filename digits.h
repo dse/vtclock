@@ -106,7 +106,6 @@ char *digits[] = {
 
 char *colon = 
   "   \n"
-  "   \n"
   " XX\n"
   " XX\n"
   "   \n"
