@@ -142,6 +142,7 @@ usage() {
           "  -b  turn bouncing on (default)\n"
           "  -B  turn bouncing off\n"
           "  -d  # seconds between each bouncing step (default 30)\n"
+          "  -1, -2, -3  select a font\n"
           );
 }
 
@@ -175,7 +176,7 @@ main(int argc, char **argv) {
     extern int opterr;
     opterr = 1;
     optind = 1;
-    while ((ch = getopt(argc, argv, "hbBd:")) != -1) {
+    while ((ch = getopt(argc, argv, "hbBd:123")) != -1) {
 
       switch (ch) {
       case 'h':
@@ -189,6 +190,15 @@ main(int argc, char **argv) {
         break;
       case 'd':
         vtclock_bounce_delay = atoi(optarg);
+        break;
+      case '1':
+        config = &vtclock_config_2;
+        break;
+      case '2':
+        config = &vtclock_config_1;
+        break;
+      case '3':
+        config = &vtclock_digital_config_1;
         break;
       case '?':
       default:
