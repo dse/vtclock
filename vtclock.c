@@ -28,6 +28,8 @@
 #include "font3.h"
 #include "digitalfont0.h"
 
+void pollkey(void);
+
 #define AT_LEAST(a, b) do { if (a < b) a = b; } while(0)
 
 #define MAKE_DIGIT_WINDOW(sw, type) \
@@ -129,7 +131,8 @@ mydelay()
     gettimeofday(&curr, NULL);
     if (curr.tv_sec > prev.tv_sec)
       return;
-    small_sleep();
+    /* small_sleep(); */
+    pollkey();
     prev = curr;
   }
 }
@@ -280,6 +283,10 @@ main(int argc, char **argv) {
   }
 
   initscr();
+  cbreak();
+  noecho();
+  nonl();
+  wtimeout(curscr, 50);
 
   cl_height = 0;
   if (config->hour)   AT_LEAST(cl_height, config->hour->digit_height);
@@ -370,12 +377,16 @@ main(int argc, char **argv) {
     wnoutrefresh(cl);
     doupdate();
 
+    pollkey();
+
     if (blinking_colons) {
       mydelay_half();
       DRAW_BLANK_COLON(c1, colon1);
       DRAW_BLANK_COLON(c2, colon2);
       wnoutrefresh(cl);
       doupdate();
+
+      pollkey();
     }
 
     mydelay();
@@ -386,3 +397,16 @@ main(int argc, char **argv) {
   return 0;
 }
 
+void
+pollkey(void)
+{
+  int key;
+  key = wgetch(curscr);
+  switch (key) {
+  case 12:			/* Control-L */
+  case 18:			/* Control-R */
+  case KEY_REFRESH:
+    redrawwin(curscr);
+    wrefresh(curscr);
+  }
+}
