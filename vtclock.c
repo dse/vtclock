@@ -8,10 +8,10 @@
  * Original code by Rob Hoeft.
  * Enhancements by Darren Embry.
  *
+ * TODO: handle resize
  */
 
 #include <ncurses.h>
-#include "digits.h"
 #include <time.h>
 #include <unistd.h>
 #include <sys/time.h>
@@ -20,9 +20,70 @@
 #include <time.h>
 #include <ctype.h>
 
+#include "font0.h"
+#include "font1.h"
+#include "font2.h"
+
+#define AT_LEAST(a,b) do { if (a < b) a = b; } while(0)
+
+#define MAKE_DIGIT_WINDOW(sw,type) \
+  do { \
+    if (config->type) { \
+      sw = subwin(cl,config->type->digit_height,config->type->digit_width, \
+                  starty + (VTCLOCK_ALIGN * (cl_height - config->type->digit_height) / 2),startx); \
+      startx += config->type->digit_width; \
+    } else { \
+      sw = NULL; \
+    } \
+  } while(0)
+#define MAKE_COLON_WINDOW(sw,type) \
+  do { \
+    if (config->type) { \
+      sw = subwin(cl,config->type->digit_height,config->type->colon_width,\
+                  starty + (VTCLOCK_ALIGN * (cl_height - config->type->digit_height) / 2),startx); \
+      startx += config->type->colon_width; \
+    } else { \
+      sw = NULL; \
+    } \
+  } while(0)
+#define DRAW_DIGIT(sw,type,digit) \
+  do { \
+    if (sw) { \
+      vtclock_print_string(sw,0,0,config->type->digits[digit]); \
+    } \
+  } while(0)
+#define DRAW_COLON(sw,type) \
+  do { \
+    if (sw) { \
+      vtclock_print_string(sw,0,0,config->type->colon); \
+    } \
+  } while(0)
+
+typedef struct {
+  vtclock_font *hour;
+  vtclock_font *minute;
+  vtclock_font *second;
+  vtclock_font *colon1;
+  vtclock_font *colon2;
+} vtclock_config;
+
+vtclock_config vtclock_config_1 = {
+  &vtclock_font_0,&vtclock_font_0,&vtclock_font_0,
+  &vtclock_font_0,&vtclock_font_0
+};
+
+vtclock_config vtclock_config_2 = {
+  &vtclock_font_1,&vtclock_font_1,&vtclock_font_2,
+  &vtclock_font_1,NULL
+};
+
+/* 0 = top, 1 = middle, 2 = bottom */
+#define VTCLOCK_ALIGN 0
+
+/* vtclock moves a step ever VTCLOCK_BOUNCE seconds. */
 #define VTCLOCK_BOUNCE 30
 
-/* VTCLOCK_INVERSE code is buggy right now. */
+/* The VTCLOCK_INVERSE code is buggy right now. */
 #define VTCLOCK_INVERSE 0
 
 void 
@@ -75,23 +136,34 @@ main() {
 				/* subcomponents of cl */
   WINDOW *cld;			/* used to erase the clock */
 
-  int di_width, cl_height, co_width, cl_width;
+  vtclock_config *config = &vtclock_config_2;
+  
+  int cl_height, cl_width;
   int y, x;			/* position */
   int startx, starty;		/* for placing sub-windows */
   int updown, leftright;	/* dy, dx */
   int futurex, futurey;		/* temp. for bounds checking */
   int waitfor = 0;		/* bouncing-related counter */
-
+  
   time_t t_time;
   struct tm *tm_time;		/* extract HH:MM:SS from here */
 
   initscr();
-
-  cl_height = DIGIT_HEIGHT;
-  di_width = DIGIT_WIDTH;
-  co_width = COLON_WIDTH;
-  cl_width = co_width * 2 + di_width * 6;
   
+  cl_height = 0;
+  if (config->hour)   AT_LEAST(cl_height,config->hour->digit_height);
+  if (config->minute) AT_LEAST(cl_height,config->minute->digit_height);
+  if (config->second) AT_LEAST(cl_height,config->second->digit_height);
+  if (config->colon1) AT_LEAST(cl_height,config->colon1->digit_height);
+  if (config->colon2) AT_LEAST(cl_height,config->colon2->digit_height);
+  
+  cl_width 
+    = (config->hour   ? config->hour->digit_width * 2 : 0)
+    + (config->minute ? config->minute->digit_width * 2 : 0)
+    + (config->second ? config->second->digit_width * 2 : 0)
+    + (config->colon1 ? config->colon1->colon_width : 0)
+    + (config->colon2 ? config->colon2->colon_width : 0);
+
   if ((LINES < cl_height) || (COLS < cl_width)) {
     endwin();
     fprintf(stderr,"(LINES=%d COLS=%d) screen too small!\n",
@@ -111,29 +183,30 @@ main() {
   cl  = newwin(cl_height, cl_width, y, x);
   cld = newwin(cl_height, cl_width, y, x);
 
-  h1 = subwin(cl, cl_height, di_width, starty, startx); startx += di_width;
-  h2 = subwin(cl, cl_height, di_width, starty, startx); startx += di_width;
-  c1 = subwin(cl, cl_height, co_width, starty, startx); startx += co_width;
-  m1 = subwin(cl, cl_height, di_width, starty, startx); startx += di_width;
-  m2 = subwin(cl, cl_height, di_width, starty, startx); startx += di_width;
-  c2 = subwin(cl, cl_height, co_width, starty, startx); startx += co_width;
-  s1 = subwin(cl, cl_height, di_width, starty, startx); startx += di_width;
-  s2 = subwin(cl, cl_height, di_width, starty, startx);
-
+  MAKE_DIGIT_WINDOW(h1,hour);
+  MAKE_DIGIT_WINDOW(h2,hour);
+  MAKE_COLON_WINDOW(c1,colon1);
+  MAKE_DIGIT_WINDOW(m1,minute);
+  MAKE_DIGIT_WINDOW(m2,minute);
+  MAKE_COLON_WINDOW(c2,colon2);
+  MAKE_DIGIT_WINDOW(s1,second);
+  MAKE_DIGIT_WINDOW(s2,second);
+  
   curs_set(0);
 
   while (1) {
     time(&t_time);
     tm_time = localtime(&t_time);
-    vtclock_print_string(h1, 0, 0, digits[tm_time->tm_hour / 10]);
-    vtclock_print_string(h2, 0, 0, digits[tm_time->tm_hour % 10]);
-    vtclock_print_string(m1, 0, 0, digits[tm_time->tm_min / 10]);
-    vtclock_print_string(m2, 0, 0, digits[tm_time->tm_min % 10]);
-    vtclock_print_string(s1, 0, 0, digits[tm_time->tm_sec / 10]);
-    vtclock_print_string(s2, 0, 0, digits[tm_time->tm_sec % 10]);
-    vtclock_print_string(c1, 0, 0, colon);
-    vtclock_print_string(c2, 0, 0, colon); 
 
+    DRAW_DIGIT(h1,hour,tm_time->tm_hour / 10);
+    DRAW_DIGIT(h2,hour,tm_time->tm_hour % 10);
+    DRAW_DIGIT(m1,minute,tm_time->tm_min / 10);
+    DRAW_DIGIT(m2,minute,tm_time->tm_min % 10);
+    DRAW_DIGIT(s1,second,tm_time->tm_sec / 10);
+    DRAW_DIGIT(s2,second,tm_time->tm_sec % 10);
+    DRAW_COLON(c1,colon1);
+    DRAW_COLON(c2,colon2); 
+    
     if (waitfor >= VTCLOCK_BOUNCE) {
       /* erase old */
       mvwin(cld, y, x);
