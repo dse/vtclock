@@ -52,7 +52,11 @@ FILE *
 open_msg_file (void)
 {
   if (msg_file != NULL) return msg_file;
-  msg_file = fopen(msg_argv[0], "r");
+  if (msg_args_is_pipe) {
+    msg_file = popen(msg_argv[0], "r");
+  } else {
+    msg_file = fopen(msg_argv[0], "r");
+  }
   if (msg_file == NULL) return NULL;
   return msg_file;
 }
