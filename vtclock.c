@@ -11,6 +11,7 @@
  * TODO: handle resize
  */
 
+#include <string.h>
 #include <ncurses.h>
 #include <time.h>
 #include <unistd.h>
@@ -199,22 +200,19 @@ vtclock_print_blank_version_of_string(WINDOW *win, int y, int x, char *str)
 void
 usage() {
   fprintf(stderr,
-          "usage: vtclock [option ...]\n"
-          "       vtclock [option ...] -f filename\n"
-          "       vtclock [option ...] -p \"command argument ...\"\n"
-          "  -h         help\n"
-          "  -b         turn bouncing on (default)\n"
-          "  -B         turn bouncing off\n"
-          "  -d <secs>  # seconds between each bouncing step (default 30)\n"
-          "  -1, -2, -3, -4, -5  select a font\n"
-	  "  -v         use inverse video for character drawing\n"
-	  "  -V         turn off inverse video\n"
-	  "  -k/-K      blinking colons on/off (default is off)\n"
-	  "  -c <char>  use specified character\n"
-	  "  -C         let font specify the characters (default)\n"
-	  "  -f         shows one line at a time from filename\n"
-	  "  -p         shows one line at a time from output of command\n"
-	  "  -D <secs>  # seconds between each message line (default 5)\n"
+	  /*******************************************************************************/
+	  "usage: vtclock [option ...]\n"
+	  "  -h         help\n"
+	  "  -b/-B      turn bouncing on/off                             (default on)\n"
+	  "  -d <secs>  delay between each bounce step                   (default 30 secs)\n"
+	  "  -1/-2/-3/-4/-5  select a font                               (default font #1)\n"
+	  "  -c <char>  use specified character for font drawing\n"
+	  "  -V         use bright solid inverse-video blocks\n"
+	  "  -C/-V      use normal font drawing characters               (default)\n"
+	  "  -k/-K      blinking colons on/off                           (default off)\n"
+	  "  -f <file>  shows one line at a time from filename\n"
+	  "  -p <cmd>   shows one line at a time from output of command  (via /bin/sh -c)\n"
+	  "  -D <secs>  delay between each message line                  (default 5 secs)\n"
           );
 }
 
@@ -241,9 +239,11 @@ main(int argc, char **argv) {
   int vtclock_bounce_delay = 30;
   int vtclock_msg_delay = 5;
   int blinking_colons = 0;
-  int is_pipe = 0;
+  int msg_from_pipe = 0;
 
   int show_message_line = 0;
+  char *msg_filename = NULL;
+
   char *msg = NULL;
   WINDOW *msgw = NULL;
 
@@ -255,12 +255,11 @@ main(int argc, char **argv) {
     extern int opterr;
     opterr = 1;
     optind = 1;
-    while ((ch = getopt(argc, argv, "hbBd:D:12345vVkKc:Cfp")) != -1) {
+    while ((ch = getopt(argc, argv, "hbBd:D:12345vVkKc:Cf:p:")) != -1) {
       switch (ch) {
       case 'h':
         usage();
         exit(0);
-
       case 'c':
 	vtclock_inverse = 0;
 	vtclock_char = optarg[0];
@@ -277,7 +276,6 @@ main(int argc, char **argv) {
 	vtclock_inverse = 0;
 	vtclock_char = 0;
 	break;
-
       case 'b':
         vtclock_bounce = 1;
         break;
@@ -313,11 +311,17 @@ main(int argc, char **argv) {
 	break;
       case 'f':
 	show_message_line = 1;
-	is_pipe = 0;
+	msg_from_pipe = 0;
+	if (msg_filename != NULL)
+	  free(msg_filename);
+	msg_filename = strdup(optarg);
 	break;
       case 'p':
 	show_message_line = 1;
-	is_pipe = 1;
+	msg_from_pipe = 1;
+	if (msg_filename != NULL)
+	  free(msg_filename);
+	msg_filename = strdup(optarg);
 	break;
       case '?':
       default:
@@ -360,7 +364,7 @@ main(int argc, char **argv) {
 
   if (show_message_line) {
     if (LINES >= (cl_height + 4)) {
-      init_message(cl_width, argc, argv, is_pipe, vtclock_msg_delay);
+      init_message(cl_width, msg_filename, msg_from_pipe, vtclock_msg_delay);
       cl_height += 2;
     }
   }
