@@ -200,16 +200,21 @@ void
 usage() {
   fprintf(stderr,
           "usage: vtclock [option ...]\n"
-          "  -h  help\n"
-          "  -b  turn bouncing on (default)\n"
-          "  -B  turn bouncing off\n"
-          "  -d  # seconds between each bouncing step (default 30)\n"
+          "       vtclock [option ...] [-f] filename\n"
+          "       vtclock [option ...] [-p] command argument ...\n"
+          "  -h         help\n"
+          "  -b         turn bouncing on (default)\n"
+          "  -B         turn bouncing off\n"
+          "  -d <secs>  # seconds between each bouncing step (default 30)\n"
           "  -1, -2, -3, -4, -5  select a font\n"
-	  "  -v  use inverse video for character drawing\n"
-	  "  -V  turn off inverse video\n"
-	  "  -k/-K     blinking colons on/off (default is off)\n"
-	  "  -c<char>  use specified character\n"
-	  "  -C        let font specify the characters (default)\n"
+	  "  -v         use inverse video for character drawing\n"
+	  "  -V         turn off inverse video\n"
+	  "  -k/-K      blinking colons on/off (default is off)\n"
+	  "  -c <char>  use specified character\n"
+	  "  -C         let font specify the characters (default)\n"
+	  "  -f         shows one-line messages from filename\n"
+	  "  -p         shows one-line messages from output of command\n"
+	  "  -D <secs>  # seconds between each one-line message (default 5)\n"
           );
 }
 
@@ -234,7 +239,9 @@ main(int argc, char **argv) {
 
   int vtclock_bounce = 1;
   int vtclock_bounce_delay = 30;
+  int vtclock_msg_delay = 5;
   int blinking_colons = 0;
+  int is_pipe = 0;
 
   int show_message_line = 0;
   char *msg = NULL;
@@ -248,7 +255,7 @@ main(int argc, char **argv) {
     extern int opterr;
     opterr = 1;
     optind = 1;
-    while ((ch = getopt(argc, argv, "hbBd:12345vVkKc:C")) != -1) {
+    while ((ch = getopt(argc, argv, "hbBd:D:12345vVkKc:Cfp")) != -1) {
       switch (ch) {
       case 'h':
         usage();
@@ -267,6 +274,9 @@ main(int argc, char **argv) {
         break;
       case 'd':
         vtclock_bounce_delay = atoi(optarg);
+        break;
+      case 'D':
+        vtclock_msg_delay = atoi(optarg);
         break;
       case '1':
         config = &vtclock_config_2;
@@ -294,6 +304,12 @@ main(int argc, char **argv) {
 	break;
       case 'K':
 	blinking_colons = 0;
+	break;
+      case 'f':
+	is_pipe = 0;
+	break;
+      case 'p':
+	is_pipe = 1;
 	break;
       case '?':
       default:
@@ -336,7 +352,7 @@ main(int argc, char **argv) {
 
   if (LINES >= (cl_height + 4)) {
     show_message_line = 1;
-    init_message(cl_width, argc, argv);
+    init_message(cl_width, argc, argv, is_pipe, vtclock_msg_delay);
     cl_height += 2;
   }
   
