@@ -107,7 +107,6 @@ vtclock_config vtclock_config_4 = {
 /* 0 = top; 1 = middle; 2 = bottom */
 #define VTCLOCK_ALIGN 0
 
-/* The vtclock_inverse code is buggy right now. */
 static int vtclock_inverse = 0;
 
 void
@@ -384,7 +383,6 @@ main(int argc, char **argv) {
       DRAW_BLANK_COLON(c2, colon2);
       wnoutrefresh(cl);
       doupdate();
-
     }
 
     mydelay();
