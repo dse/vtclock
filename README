@@ -1,0 +1,21 @@
+Stuff to do:
+Turn off the cursor
+Blink the colons
+Use figlet font files
+do nifty transition effects on the digits (scrolling, xdaliclock type thing)
+bounce it around the screen (no burnin)
+accept user supplied date formats
+analog mode
+multi-terminal mode
+e-mail reader  mode
+oh, and write a freakin' Makefile (me dumb)
+
+compile it like this:
+
+cc vtclock.c -o vtclock -lncurses -I.
+
+(I'm pretty sure that -I. thing is braindamaged, and i should be using 
+"digits.h" or something)
+
+--
+Rob Hoeft
