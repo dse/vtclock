@@ -88,8 +88,8 @@ vtclock_config vtclock_config_2 = {
 /* 0 = top, 1 = middle, 2 = bottom */
 #define VTCLOCK_ALIGN 0
 
-/* The VTCLOCK_INVERSE code is buggy right now. */
-#define VTCLOCK_INVERSE 0
+/* The vtclock_inverse code is buggy right now. */
+static int vtclock_inverse = 0;
 
 void
 mydelay()
@@ -116,7 +116,7 @@ void
 vtclock_print_string(WINDOW *win, int y, int x,
                      char *str)
 {
-  if (VTCLOCK_INVERSE)
+  if (vtclock_inverse)
     {
       char *p;
       mvwin(win,y,x);
@@ -143,6 +143,8 @@ usage() {
           "  -B  turn bouncing off\n"
           "  -d  # seconds between each bouncing step (default 30)\n"
           "  -1, -2, -3  select a font\n"
+	  "  -v  use inverse video for character drawing\n"
+	  "  -V  turn off inverse video\n"
           );
 }
 
@@ -176,7 +178,7 @@ main(int argc, char **argv) {
     extern int opterr;
     opterr = 1;
     optind = 1;
-    while ((ch = getopt(argc, argv, "hbBd:123")) != -1) {
+    while ((ch = getopt(argc, argv, "hbBd:123vV")) != -1) {
 
       switch (ch) {
       case 'h':
@@ -200,6 +202,12 @@ main(int argc, char **argv) {
       case '3':
         config = &vtclock_digital_config_1;
         break;
+      case 'v':
+	vtclock_inverse = 1;
+	break;
+      case 'V':
+	vtclock_inverse = 0;
+	break;
       case '?':
       default:
         usage();
