@@ -200,8 +200,8 @@ void
 usage() {
   fprintf(stderr,
           "usage: vtclock [option ...]\n"
-          "       vtclock [option ...] [-f] filename\n"
-          "       vtclock [option ...] [-p] command argument ...\n"
+          "       vtclock [option ...] -f filename\n"
+          "       vtclock [option ...] -p \"command argument ...\"\n"
           "  -h         help\n"
           "  -b         turn bouncing on (default)\n"
           "  -B         turn bouncing off\n"
@@ -212,9 +212,9 @@ usage() {
 	  "  -k/-K      blinking colons on/off (default is off)\n"
 	  "  -c <char>  use specified character\n"
 	  "  -C         let font specify the characters (default)\n"
-	  "  -f         shows one-line messages from filename\n"
-	  "  -p         shows one-line messages from output of command\n"
-	  "  -D <secs>  # seconds between each one-line message (default 5)\n"
+	  "  -f         shows one line at a time from filename\n"
+	  "  -p         shows one line at a time from output of command\n"
+	  "  -D <secs>  # seconds between each message line (default 5)\n"
           );
 }
 
