@@ -1,5 +1,4 @@
 Stuff to do:
-- ^L or ^R to redraw
 - handle window size change
 - Use figlet font files
 - do nifty transition effects on the digits (scrolling, xdaliclock type thing)
