@@ -25,6 +25,7 @@
 #include "font0.h"
 #include "font1.h"
 #include "font2.h"
+#include "font3.h"
 #include "digitalfont0.h"
 
 #define AT_LEAST(a,b) do { if (a < b) a = b; } while(0)
@@ -85,6 +86,11 @@ vtclock_config vtclock_config_2 = {
   &vtclock_font_1,NULL
 };
 
+vtclock_config vtclock_config_3 = {
+  &vtclock_font_3,&vtclock_font_3,&vtclock_font_3,
+  &vtclock_font_3,&vtclock_font_3
+};
+
 /* 0 = top, 1 = middle, 2 = bottom */
 #define VTCLOCK_ALIGN 0
 
@@ -142,7 +148,7 @@ usage() {
           "  -b  turn bouncing on (default)\n"
           "  -B  turn bouncing off\n"
           "  -d  # seconds between each bouncing step (default 30)\n"
-          "  -1, -2, -3  select a font\n"
+          "  -1, -2, -3, -4  select a font\n"
 	  "  -v  use inverse video for character drawing\n"
 	  "  -V  turn off inverse video\n"
           );
@@ -178,7 +184,7 @@ main(int argc, char **argv) {
     extern int opterr;
     opterr = 1;
     optind = 1;
-    while ((ch = getopt(argc, argv, "hbBd:123vV")) != -1) {
+    while ((ch = getopt(argc, argv, "hbBd:1234vV")) != -1) {
 
       switch (ch) {
       case 'h':
@@ -201,6 +207,9 @@ main(int argc, char **argv) {
         break;
       case '3':
         config = &vtclock_digital_config_1;
+        break;
+      case '4':
+        config = &vtclock_config_3;
         break;
       case 'v':
 	vtclock_inverse = 1;
