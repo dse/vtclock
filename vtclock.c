@@ -1,6 +1,6 @@
 /*
  * vtclock.c
- * 
+ *
  * Program to display a large digital clock.
  *
  * Font "stolen" from figlet
@@ -19,6 +19,8 @@
 #include <unistd.h>
 #include <time.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <getopt.h>
 
 #include "font0.h"
 #include "font1.h"
@@ -86,14 +88,11 @@ vtclock_config vtclock_config_2 = {
 /* 0 = top, 1 = middle, 2 = bottom */
 #define VTCLOCK_ALIGN 0
 
-/* vtclock moves a step ever VTCLOCK_BOUNCE seconds. */
-#define VTCLOCK_BOUNCE 30
-
 /* The VTCLOCK_INVERSE code is buggy right now. */
 #define VTCLOCK_INVERSE 0
 
-void 
-mydelay() 
+void
+mydelay()
      /* sleep until second changes.  does this by polling every
       * 1/10 second.  close enough for government work. */
 {
@@ -107,7 +106,7 @@ mydelay()
       return;
     }
     timeout.tv_sec = 0;
-    timeout.tv_usec = 100000;	/* 0.1 secs */
+    timeout.tv_usec = 100000;   /* 0.1 secs */
     select(0,NULL,NULL,NULL,&timeout);
     prevsecs = secs;
   }
@@ -115,18 +114,18 @@ mydelay()
 
 void
 vtclock_print_string(WINDOW *win, int y, int x,
-		     char *str)
+                     char *str)
 {
   if (VTCLOCK_INVERSE)
     {
       char *p;
       mvwin(win,y,x);
       for (p = str; *p; ++p) {
-	if (iscntrl(*p)) {
-	  waddch(win,*p);
-	} else {
-	  waddch(win,' '|(isspace(*p)?A_NORMAL:A_REVERSE));
-	}
+        if (iscntrl(*p)) {
+          waddch(win,*p);
+        } else {
+          waddch(win,' '|(isspace(*p)?A_NORMAL:A_REVERSE));
+        }
       }
     }
   else
@@ -135,35 +134,81 @@ vtclock_print_string(WINDOW *win, int y, int x,
     }
 }
 
+void
+usage() {
+  fprintf(stderr,
+          "usage: vtclock [option ...]\n"
+          "  -h  help\n"
+          "  -b  turn bouncing on (default)\n"
+          "  -B  turn bouncing off\n"
+          "  -d  # seconds between each bouncing step (default 30)\n"
+          );
+}
+
 int
-main() {
-  WINDOW *cl;			/* used to draw the clock */
+main(int argc, char **argv) {
+  WINDOW *cl;                   /* used to draw the clock */
   WINDOW *h1, *h2, *m1, *m2, *s1, *s2, *c1, *c2;
-				/* subcomponents of cl */
-  WINDOW *cld;			/* used to erase the clock */
+                                /* subcomponents of cl */
+  WINDOW *cld;                  /* used to erase the clock */
 
   vtclock_config *config = &vtclock_config_2;
-  
+
   int cl_height, cl_width;
-  int y, x;			/* position */
-  int startx, starty;		/* for placing sub-windows */
-  int updown, leftright;	/* dy, dx */
-  int futurex, futurey;		/* temp. for bounds checking */
-  int waitfor = 0;		/* bouncing-related counter */
-  
+  int y, x;                     /* position */
+  int startx, starty;           /* for placing sub-windows */
+  int updown, leftright;        /* dy, dx */
+  int futurex, futurey;         /* temp. for bounds checking */
+  int waitfor = 0;              /* bouncing-related counter */
+
   time_t t_time;
-  struct tm *tm_time;		/* extract HH:MM:SS from here */
+  struct tm *tm_time;           /* extract HH:MM:SS from here */
+
+  int vtclock_bounce = 1;
+  int vtclock_bounce_delay = 30;
+
+  {
+    int ch;
+    extern char *optarg;
+    extern int optind;
+    extern int optopt;
+    extern int opterr;
+    opterr = 1;
+    optind = 1;
+    while ((ch = getopt(argc, argv, "hbBd:")) != -1) {
+
+      switch (ch) {
+      case 'h':
+        usage();
+        exit(0);
+      case 'b':
+        vtclock_bounce = 1;
+        break;
+      case 'B':
+        vtclock_bounce = 0;
+        break;
+      case 'd':
+        vtclock_bounce_delay = atoi(optarg);
+        break;
+      case '?':
+      default:
+        usage();
+        exit(2);
+      }
+
+    }
+  }
 
   initscr();
-  
+
   cl_height = 0;
   if (config->hour)   AT_LEAST(cl_height,config->hour->digit_height);
   if (config->minute) AT_LEAST(cl_height,config->minute->digit_height);
   if (config->second) AT_LEAST(cl_height,config->second->digit_height);
   if (config->colon1) AT_LEAST(cl_height,config->colon1->digit_height);
   if (config->colon2) AT_LEAST(cl_height,config->colon2->digit_height);
-  
-  cl_width 
+
+  cl_width
     = (config->hour   ? config->hour->digit_width * 2 : 0)
     + (config->minute ? config->minute->digit_width * 2 : 0)
     + (config->second ? config->second->digit_width * 2 : 0)
@@ -173,7 +218,7 @@ main() {
   if ((LINES < cl_height) || (COLS < cl_width)) {
     endwin();
     fprintf(stderr,"(LINES=%d COLS=%d) screen too small!\n",
-	    LINES,COLS);
+            LINES,COLS);
     exit(3);
   }
 
@@ -197,7 +242,7 @@ main() {
   MAKE_COLON_WINDOW(c2,colon2);
   MAKE_DIGIT_WINDOW(s1,second);
   MAKE_DIGIT_WINDOW(s2,second);
-  
+
   curs_set(0);
 
   while (1) {
@@ -211,26 +256,28 @@ main() {
     DRAW_DIGIT(s1,second,tm_time->tm_sec / 10);
     DRAW_DIGIT(s2,second,tm_time->tm_sec % 10);
     DRAW_COLON(c1,colon1);
-    DRAW_COLON(c2,colon2); 
-    
-    if (waitfor >= VTCLOCK_BOUNCE) {
-      /* erase old */
-      mvwin(cld, y, x);
-      wnoutrefresh(cld);
+    DRAW_COLON(c2,colon2);
 
-      /* bouncy bouncy */
-      futurex = x + leftright;
-      futurey = y + updown;
-      if ((futurex < 0) || (futurex > (COLS - cl_width))) {
-	futurex = x + (leftright *= -1);
-      }
-      if ((futurey < 0) || (futurey > (LINES - cl_height))) {
-	futurey = y + (updown *= -1);
-      }
-      x = futurex;
-      y = futurey;
+    if (vtclock_bounce) {
+      if (waitfor >= vtclock_bounce_delay) {
+        /* erase old */
+        mvwin(cld, y, x);
+        wnoutrefresh(cld);
 
-      waitfor = 0;
+        /* bouncy bouncy */
+        futurex = x + leftright;
+        futurey = y + updown;
+        if ((futurex < 0) || (futurex > (COLS - cl_width))) {
+          futurex = x + (leftright *= -1);
+        }
+        if ((futurey < 0) || (futurey > (LINES - cl_height))) {
+          futurey = y + (updown *= -1);
+        }
+        x = futurex;
+        y = futurey;
+
+        waitfor = 0;
+      }
     }
 
     mvwin(cl,y,x);
@@ -239,7 +286,7 @@ main() {
     mydelay();
     ++waitfor;
   }
- 
+
   endwin();
   return 0;
 }
