@@ -50,9 +50,9 @@ main() {
 
   initscr();
 
-  cl_height = 9;
-  di_width = 11;
-  co_width = 6;
+  cl_height = DIGIT_HEIGHT;
+  di_width = DIGIT_WIDTH;
+  co_width = COLON_WIDTH;
   cl_width = co_width * 2 + di_width * 6;
   
   starty = (LINES - cl_height) / 2;

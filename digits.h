@@ -1,18 +1,117 @@
-#define DIGIT_HEIGHT = 9
-#define DIGIT_WIDTH = 11
+#define DIGIT_HEIGHT 9
+#define DIGIT_WIDTH 12
+#define COLON_WIDTH 4
 
 char *digits[] = {
+  "   XXXXXX  \n"
+  "  XX    XX \n"
+  " XX    XXXX\n"
+  " XX   XX XX\n"
+  " XX  XX  XX\n"
+  " XX XX   XX\n"
+  " XXXX    XX\n"
+  "  XX    XX \n"
+  "   XXXXXX  \n",
 
-"  .oooo.  \nd8P' `Y8b \n888    888\n888    888\n888    888\n`88b  d88'\n `Y8bd8P'",
-"     .o \n   o888 \n    888 \n    888 \n    888 \n    888 \n   o888o\n",
-"  .oooo.  \n.dP\"\"Y88b \n      ]8P'\n    .d8P' \n  .dP'    \n.oP     .o\n8888888888",
-"  .oooo.  \n.dP\"\"Y88b \n      ]8P'\n    <88b. \n     `88b.\no.   .88P \n`8bd88P'  ",
-"      .o  \n    .d88  \n  .d'888  \n.d'  888  \n88ooo888oo\n     888  \n    o888o ",
-"  oooooooo\n dP\"\"\"\"\"\"\"\nd88888b.  \n    `Y88b \n      ]88 \no.   .88P \n`8bd88P'  ",
-"    .ooo  \n  .88'    \n d88'     \nd888P\"Ybo.\nY88[   ]88\n`Y88   88P\n `88bod8' ",
-" ooooooooo\nd\"\"\"\"\"\"\"8'\n      .8' \n     .8'  \n    .8'   \n   .8'    \n  .8'     ",
-  " .ooooo.  \nd88'   `8.\nY88..  .8'\n `88888b. \n.8'  ``88b\n`8.   .88P\n `boood8' ",
-" .ooooo.  \n888' `Y88.\n888    888\n `Vbood888\n      888'\n    .88P' \n  .oP'    "
+  "     XX    \n"
+  "    XXX    \n"
+  "  XXXXX    \n"
+  "     XX    \n"
+  "     XX   \n"
+  "     XX    \n"
+  "     XX    \n"
+  "     XX    \n"
+  "  XXXXXXXX \n",
+  
+  "  XXXXXXXX \n"
+  " XX      XX\n"
+  "         XX\n"
+  "       XXX \n"
+  "     XXX   \n"
+  "   XXX     \n"
+  "  XX       \n"
+  " XX        \n"
+  " XXXXXXXXXX\n",
+  
+  " XXXXXXXXXX\n"
+  "         XX\n"
+  "       XXX \n"
+  "    XXXX   \n"
+  "       XXX \n"
+  "         XX\n"
+  "         XX\n"
+  " XX      XX\n"
+  "  XXXXXXXX \n",
+  
+  "      XXX  \n"
+  "     XXXX  \n"
+  "    XX XX  \n"
+  "   XX  XX  \n"
+  "  XX   XX  \n"
+  " XXXXXXXXXX\n"
+  "       XX  \n"
+  "       XX  \n"
+  "       XX  \n",
+  
+  " XXXXXXXXXX\n"
+  " XX        \n"
+  " XX        \n"
+  " XXXXXXXX  \n"
+  "        XX \n"
+  "         XX\n"
+  "         XX\n"
+  " XX     XX \n"
+  "  XXXXXXX  \n",
+  
+  "     XXXX  \n"
+  "   XXX     \n"
+  "  XX       \n"
+  " XX        \n"
+  " XXXXXXXXX \n"
+  " XX      XX\n"
+  " XX      XX\n"
+  " XX      XX\n"
+  "  XXXXXXXX \n",
+  
+  " XXXXXXXXXX\n"
+  "         XX\n"
+  "        XX \n"
+  "       XX  \n"
+  "      XX   \n"
+  "     XX    \n"
+  "    XX     \n"
+  "   XX      \n"
+  "   XX      \n",
+  
+  "  XXXXXXXX \n"
+  " XX      XX\n"
+  " XX      XX\n"
+  "  XX    XX \n"
+  "   XXXXXX  \n"
+  "  XX    XX \n"
+  " XX      XX\n"
+  " XX      XX\n"
+  "  XXXXXXXX \n",
+  
+  "  XXXXXXXX \n"
+  " XX      XX\n"
+  " XX      XX\n"
+  " XX      XX\n"
+  "  XXXXXXXXX\n"
+  "         XX\n"
+  "        XX \n"
+  "      XXX  \n"
+  "   XXXX    \n"
 };
 
-char *colon = "\n\n o8o\n `\"'\n o8o\n `\"'\n";
+char *colon = 
+  "   \n"
+  "   \n"
+  " XX\n"
+  " XX\n"
+  "   \n"
+  "   \n"
+  "   \n"
+  " XX\n"
+  " XX\n"
+;
