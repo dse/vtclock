@@ -19,6 +19,8 @@
 #include <unistd.h>
 #include <time.h>
 
+#define VTCLOCK_DELAY 1
+
 void 
 mydelay() 
      /* sleep until second changes.  does this by polling every
@@ -42,11 +44,20 @@ mydelay()
 
 int
 main() {
+  WINDOW *cl;			/* used to draw the clock */
   WINDOW *h1, *h2, *m1, *m2, *s1, *s2, *c1, *c2;
-  int startx, starty, di_width, cl_height, co_width, cl_width;
-  int i;
-  struct tm *tm_time;
+				/* subcomponents of cl */
+  WINDOW *cld;			/* used to erase the clock */
+
+  int di_width, cl_height, co_width, cl_width;
+  int y, x;			/* position */
+  int startx, starty;		/* for placing sub-windows */
+  int updown, leftright;	/* dy, dx */
+  int futurex, futurey;		/* temp. for bounds checking */
+  int waitfor = 0;		/* bouncing-related counter */
+
   time_t t_time;
+  struct tm *tm_time;		/* extract HH:MM:SS from here */
 
   initscr();
 
@@ -55,17 +66,35 @@ main() {
   co_width = COLON_WIDTH;
   cl_width = co_width * 2 + di_width * 6;
   
-  starty = (LINES - cl_height) / 2;
-  startx = (COLS - cl_width) / 2;
+  if ((LINES < cl_height) || (COLS < cl_width)) {
+    endwin();
+    fprintf(stderr,"(LINES=%d COLS=%d) screen too small!\n",
+	    LINES,COLS);
+    exit(3);
+  }
 
-  h1 = newwin(cl_height, di_width, starty, startx); startx += di_width;
-  h2 = newwin(cl_height, di_width, starty, startx); startx += di_width;
-  c1 = newwin(cl_height, co_width, starty, startx); startx += co_width;
-  m1 = newwin(cl_height, di_width, starty, startx); startx += di_width;
-  m2 = newwin(cl_height, di_width, starty, startx); startx += di_width;
-  c2 = newwin(cl_height, co_width, starty, startx); startx += co_width;
-  s1 = newwin(cl_height, di_width, starty, startx); startx += di_width;
-  s2 = newwin(cl_height, di_width, starty, startx);
+  y = (LINES - cl_height) / 2;
+  x = (COLS - cl_width) / 2;
+
+  startx = x;
+  starty = y;
+
+  updown = (LINES > cl_height) ? 1 : 0;
+  leftright = (COLS > cl_width) ? 1 : 0;
+
+  cl  = newwin(cl_height, cl_width, y, x);
+  cld = newwin(cl_height, cl_width, y, x);
+
+  h1 = subwin(cl, cl_height, di_width, starty, startx); startx += di_width;
+  h2 = subwin(cl, cl_height, di_width, starty, startx); startx += di_width;
+  c1 = subwin(cl, cl_height, co_width, starty, startx); startx += co_width;
+  m1 = subwin(cl, cl_height, di_width, starty, startx); startx += di_width;
+  m2 = subwin(cl, cl_height, di_width, starty, startx); startx += di_width;
+  c2 = subwin(cl, cl_height, co_width, starty, startx); startx += co_width;
+  s1 = subwin(cl, cl_height, di_width, starty, startx); startx += di_width;
+  s2 = subwin(cl, cl_height, di_width, starty, startx);
+
+  curs_set(0);
 
   while (1) {
     time(&t_time);
@@ -78,15 +107,31 @@ main() {
     mvwprintw(s2, 0, 0, digits[tm_time->tm_sec % 10]);
     mvwprintw(c1, 0, 0, colon);
     mvwprintw(c2, 0, 0, colon); 
-    wrefresh(h1);
-    wrefresh(h2);
-    wrefresh(c1);
-    wrefresh(m1);
-    wrefresh(m2);
-    wrefresh(c2);
-    wrefresh(s1);
-    wrefresh(s2);
+
+    if (waitfor >= VTCLOCK_DELAY) {
+      /* erase old */
+      mvwin(cld, y, x);
+      wrefresh(cld);
+
+      /* bouncy bouncy */
+      futurex = x + leftright;
+      futurey = y + updown;
+      if ((futurex < 0) || (futurex > (COLS - cl_width))) {
+	futurex = x + (leftright *= -1);
+      }
+      if ((futurey < 0) || (futurey > (LINES - cl_height))) {
+	futurey = y + (updown *= -1);
+      }
+      x = futurex;
+      y = futurey;
+
+      waitfor = 0;
+    }
+
+    mvwin(cl,y,x);
+    wrefresh(cl);
     mydelay();
+    ++waitfor;
   }
  
   endwin();
