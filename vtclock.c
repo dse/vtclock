@@ -108,6 +108,7 @@ vtclock_config vtclock_config_4 = {
 #define VTCLOCK_ALIGN 0
 
 static int vtclock_inverse = 0;
+static char vtclock_char = 0;	/* always use this character, if set */
 
 void
 small_sleep()
@@ -130,7 +131,6 @@ mydelay()
     gettimeofday(&curr, NULL);
     if (curr.tv_sec > prev.tv_sec)
       return;
-    /* small_sleep(); */
     pollkey();
     prev = curr;
   }
@@ -146,7 +146,6 @@ mydelay_half()
     gettimeofday(&curr, NULL);
     if (curr.tv_usec >= 500000)
       return;
-    /* small_sleep(); */
     pollkey();
   }
 }
@@ -155,19 +154,27 @@ void
 vtclock_print_string(WINDOW *win, int y, int x,
                      char *str)
 {
-  if (vtclock_inverse)
+  if (vtclock_inverse) 
     {
       char *p;
       mvwin(win, y, x);
       for (p = str; *p; ++p) {
-        if (iscntrl(*p)) {
-          waddch(win, *p);
-        } else {
-          waddch(win, ' ' | (isspace(*p) ? A_NORMAL : A_REVERSE));
-        }
+	if (iscntrl(*p)) {
+	  waddch(win, *p);
+	} else {
+	  waddch(win, ' ' | (isspace(*p) ? A_NORMAL : A_REVERSE));
+	}
       }
     }
-  else
+  else if (vtclock_char) 
+    {
+      char *p;
+      mvwin(win, y, x);
+      for (p = str; *p; ++p) {
+	waddch(win, iscntrl(*p) ? *p : isspace(*p) ? *p : vtclock_char);
+      }
+    }
+  else 
     {
       mvwprintw(win, y, x, str);
     }
@@ -198,7 +205,9 @@ usage() {
           "  -1, -2, -3, -4, -5  select a font\n"
 	  "  -v  use inverse video for character drawing\n"
 	  "  -V  turn off inverse video\n"
-	  "  -k/-K  blinking colons on/off (default is off)\n"
+	  "  -k/-K     blinking colons on/off (default is off)\n"
+	  "  -c<char>  use specified character\n"
+	  "  -C        let font specify the characters (default)\n"
           );
 }
 
@@ -233,11 +242,17 @@ main(int argc, char **argv) {
     extern int opterr;
     opterr = 1;
     optind = 1;
-    while ((ch = getopt(argc, argv, "hbBd:12345vVkK")) != -1) {
+    while ((ch = getopt(argc, argv, "hbBd:12345vVkKc:C")) != -1) {
       switch (ch) {
       case 'h':
         usage();
         exit(0);
+      case 'c':
+	vtclock_char = optarg[0];
+	break;
+      case 'C':
+	vtclock_char = 0;
+	break;
       case 'b':
         vtclock_bounce = 1;
         break;
