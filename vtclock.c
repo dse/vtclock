@@ -28,6 +28,7 @@
 #include "font2.h"
 #include "font3.h"
 #include "digitalfont0.h"
+#include "msg.h"
 
 void pollkey(void);
 
@@ -235,6 +236,7 @@ main(int argc, char **argv) {
   int vtclock_bounce_delay = 30;
   int blinking_colons = 0;
 
+  int show_message_line = 0;
   char *msg = NULL;
   WINDOW *msgw = NULL;
 
@@ -300,6 +302,9 @@ main(int argc, char **argv) {
       }
     }
   }
+  
+  argc -= optind;
+  argv += optind;
 
   initscr();
   cbreak();
@@ -330,8 +335,8 @@ main(int argc, char **argv) {
   }
 
   if (LINES >= (cl_height + 4)) {
-    msg = (char *)malloc(cl_width + 1);
-    msg[0] = '\0';
+    show_message_line = 1;
+    init_message(cl_width, argc, argv);
     cl_height += 2;
   }
   
@@ -356,7 +361,7 @@ main(int argc, char **argv) {
   MAKE_DIGIT_WINDOW(s1, second);
   MAKE_DIGIT_WINDOW(s2, second);
 
-  if (msg) {
+  if (show_message_line) {
     msgw = subwin(cl, 1, cl_width, y + cl_height - 1, x);
   }
 
@@ -375,14 +380,9 @@ main(int argc, char **argv) {
     DRAW_COLON(c1, colon1);
     DRAW_COLON(c2, colon2);
     
-    if (msg) {
-      if ((strlen(msg) == 0) || ((time(NULL) % 5) == 0)) {
-	int x = 1 + rand() % 9;
-	int i;
-	for (i = 0; i < x; ++i) {
-	  msg[i] = '0' + i;
-	}
-	msg[x] = '\0';
+    if (show_message_line) {
+      char *msg = get_next_message();
+      if (msg != NULL) {
 	/* clear the line */
 	mvwprintw(msgw, 0, 0, "%*s", cl_width, "");
 	/* display the new message */
