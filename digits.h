@@ -17,7 +17,7 @@ char *digits[] = {
   "    XXX    \n"
   "  XXXXX    \n"
   "     XX    \n"
-  "     XX   \n"
+  "     XX    \n"
   "     XX    \n"
   "     XX    \n"
   "     XX    \n"
