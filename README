@@ -1,10 +1,9 @@
 Stuff to do:
-Use figlet font files
-do nifty transition effects on the digits (scrolling, xdaliclock type thing)
-accept user supplied date formats
-analog mode
-multi-terminal mode
-e-mail reader  mode
-
---
-Rob Hoeft
+- ^L or ^R to redraw
+- handle window size change
+- Use figlet font files
+- do nifty transition effects on the digits (scrolling, xdaliclock type thing)
+- accept user supplied date formats
+- analog mode
+- multi-terminal mode
+- e-mail reader mode (hehe)
