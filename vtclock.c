@@ -28,44 +28,44 @@
 #include "font3.h"
 #include "digitalfont0.h"
 
-#define AT_LEAST(a,b) do { if (a < b) a = b; } while(0)
+#define AT_LEAST(a, b) do { if (a < b) a = b; } while(0)
 
-#define MAKE_DIGIT_WINDOW(sw,type) \
+#define MAKE_DIGIT_WINDOW(sw, type) \
   do { \
     if (config->type) { \
-      sw = subwin(cl,config->type->digit_height,config->type->digit_width, \
-                  starty + (VTCLOCK_ALIGN * (cl_height - config->type->digit_height) / 2),startx); \
+      sw = subwin(cl, config->type->digit_height, config->type->digit_width, \
+                  starty + (VTCLOCK_ALIGN * (cl_height - config->type->digit_height) / 2), startx); \
       startx += config->type->digit_width; \
     } else { \
       sw = NULL; \
     } \
   } while(0)
-#define MAKE_COLON_WINDOW(sw,type) \
+#define MAKE_COLON_WINDOW(sw, type) \
   do { \
     if (config->type) { \
-      sw = subwin(cl,config->type->digit_height,config->type->colon_width,\
-                  starty + (VTCLOCK_ALIGN * (cl_height - config->type->digit_height) / 2),startx); \
+      sw = subwin(cl, config->type->digit_height, config->type->colon_width, \
+                  starty + (VTCLOCK_ALIGN * (cl_height - config->type->digit_height) / 2), startx); \
       startx += config->type->colon_width; \
     } else { \
       sw = NULL; \
     } \
   } while(0)
-#define DRAW_DIGIT(sw,type,digit) \
+#define DRAW_DIGIT(sw, type, digit) \
   do { \
     if (sw) { \
-      vtclock_print_string(sw,0,0,config->type->digits[digit]); \
+      vtclock_print_string(sw, 0, 0, config->type->digits[digit]); \
     } \
   } while(0)
-#define DRAW_COLON(sw,type) \
+#define DRAW_COLON(sw, type) \
   do { \
     if (sw) { \
-      vtclock_print_string(sw,0,0,config->type->colon); \
+      vtclock_print_string(sw, 0, 0, config->type->colon); \
     } \
   } while(0)
-#define DRAW_BLANK_COLON(sw,type) \
+#define DRAW_BLANK_COLON(sw, type) \
   do { \
     if (sw) { \
-      vtclock_print_blank_version_of_string(sw,0,0,config->type->colon); \
+      vtclock_print_blank_version_of_string(sw, 0, 0, config->type->colon); \
     } \
   } while(0)
 
@@ -78,26 +78,26 @@ typedef struct {
 } vtclock_config;
 
 vtclock_config vtclock_config_1 = {
-  &vtclock_font_0,&vtclock_font_0,&vtclock_font_0,
-  &vtclock_font_0,&vtclock_font_0
+  &vtclock_font_0, &vtclock_font_0, &vtclock_font_0,
+  &vtclock_font_0, &vtclock_font_0
 };
 
 vtclock_config vtclock_digital_config_1 = {
-  &vtclock_digital_font_0,&vtclock_digital_font_0,&vtclock_digital_font_0,
-  &vtclock_digital_font_0,&vtclock_digital_font_0
+  &vtclock_digital_font_0, &vtclock_digital_font_0, &vtclock_digital_font_0,
+  &vtclock_digital_font_0, &vtclock_digital_font_0
 };
 
 vtclock_config vtclock_config_2 = {
-  &vtclock_font_1,&vtclock_font_1,&vtclock_font_2,
-  &vtclock_font_1,NULL
+  &vtclock_font_1, &vtclock_font_1, &vtclock_font_2,
+  &vtclock_font_1, NULL
 };
 
 vtclock_config vtclock_config_3 = {
-  &vtclock_font_3,&vtclock_font_3,&vtclock_font_3,
-  &vtclock_font_3,&vtclock_font_3
+  &vtclock_font_3, &vtclock_font_3, &vtclock_font_3,
+  &vtclock_font_3, &vtclock_font_3
 };
 
-/* 0 = top, 1 = middle, 2 = bottom */
+/* 0 = top; 1 = middle; 2 = bottom */
 #define VTCLOCK_ALIGN 0
 
 /* The vtclock_inverse code is buggy right now. */
@@ -109,7 +109,7 @@ small_sleep()
   static struct timeval timeout;
   timeout.tv_sec = 0;
   timeout.tv_usec = 50000;	/* 0.05 secs */
-  select(0,NULL,NULL,NULL,&timeout);
+  select(0, NULL, NULL, NULL, &timeout);
 }
 
 void
@@ -150,18 +150,18 @@ vtclock_print_string(WINDOW *win, int y, int x,
   if (vtclock_inverse)
     {
       char *p;
-      mvwin(win,y,x);
+      mvwin(win, y, x);
       for (p = str; *p; ++p) {
         if (iscntrl(*p)) {
-          waddch(win,*p);
+          waddch(win, *p);
         } else {
-          waddch(win,' '|(isspace(*p)?A_NORMAL:A_REVERSE));
+          waddch(win, ' ' | (isspace(*p) ? A_NORMAL : A_REVERSE));
         }
       }
     }
   else
     {
-      mvwprintw(win,y,x,str);
+      mvwprintw(win, y, x, str);
     }
 }
 
@@ -216,7 +216,7 @@ main(int argc, char **argv) {
   int vtclock_bounce = 1;
   int vtclock_bounce_delay = 30;
   int blinking_colons = 0;
-  
+
   {
     int ch;
     extern char *optarg;
@@ -274,11 +274,11 @@ main(int argc, char **argv) {
   initscr();
 
   cl_height = 0;
-  if (config->hour)   AT_LEAST(cl_height,config->hour->digit_height);
-  if (config->minute) AT_LEAST(cl_height,config->minute->digit_height);
-  if (config->second) AT_LEAST(cl_height,config->second->digit_height);
-  if (config->colon1) AT_LEAST(cl_height,config->colon1->digit_height);
-  if (config->colon2) AT_LEAST(cl_height,config->colon2->digit_height);
+  if (config->hour)   AT_LEAST(cl_height, config->hour->digit_height);
+  if (config->minute) AT_LEAST(cl_height, config->minute->digit_height);
+  if (config->second) AT_LEAST(cl_height, config->second->digit_height);
+  if (config->colon1) AT_LEAST(cl_height, config->colon1->digit_height);
+  if (config->colon2) AT_LEAST(cl_height, config->colon2->digit_height);
 
   cl_width
     = (config->hour   ? config->hour->digit_width * 2 : 0)
@@ -289,8 +289,8 @@ main(int argc, char **argv) {
 
   if ((LINES < cl_height) || (COLS < cl_width)) {
     endwin();
-    fprintf(stderr,"(LINES=%d COLS=%d) screen too small!\n",
-            LINES,COLS);
+    fprintf(stderr, "(LINES=%d COLS=%d) screen too small!\n",
+            LINES, COLS);
     exit(3);
   }
 
@@ -306,14 +306,14 @@ main(int argc, char **argv) {
   cl  = newwin(cl_height, cl_width, y, x);
   cld = newwin(cl_height, cl_width, y, x);
 
-  MAKE_DIGIT_WINDOW(h1,hour);
-  MAKE_DIGIT_WINDOW(h2,hour);
-  MAKE_COLON_WINDOW(c1,colon1);
-  MAKE_DIGIT_WINDOW(m1,minute);
-  MAKE_DIGIT_WINDOW(m2,minute);
-  MAKE_COLON_WINDOW(c2,colon2);
-  MAKE_DIGIT_WINDOW(s1,second);
-  MAKE_DIGIT_WINDOW(s2,second);
+  MAKE_DIGIT_WINDOW(h1, hour);
+  MAKE_DIGIT_WINDOW(h2, hour);
+  MAKE_COLON_WINDOW(c1, colon1);
+  MAKE_DIGIT_WINDOW(m1, minute);
+  MAKE_DIGIT_WINDOW(m2, minute);
+  MAKE_COLON_WINDOW(c2, colon2);
+  MAKE_DIGIT_WINDOW(s1, second);
+  MAKE_DIGIT_WINDOW(s2, second);
 
   curs_set(0);
 
@@ -321,14 +321,14 @@ main(int argc, char **argv) {
     time(&t_time);
     tm_time = localtime(&t_time);
 
-    DRAW_DIGIT(h1,hour,tm_time->tm_hour / 10);
-    DRAW_DIGIT(h2,hour,tm_time->tm_hour % 10);
-    DRAW_DIGIT(m1,minute,tm_time->tm_min / 10);
-    DRAW_DIGIT(m2,minute,tm_time->tm_min % 10);
-    DRAW_DIGIT(s1,second,tm_time->tm_sec / 10);
-    DRAW_DIGIT(s2,second,tm_time->tm_sec % 10);
-    DRAW_COLON(c1,colon1);
-    DRAW_COLON(c2,colon2);
+    DRAW_DIGIT(h1, hour, tm_time->tm_hour / 10);
+    DRAW_DIGIT(h2, hour, tm_time->tm_hour % 10);
+    DRAW_DIGIT(m1, minute, tm_time->tm_min / 10);
+    DRAW_DIGIT(m2, minute, tm_time->tm_min % 10);
+    DRAW_DIGIT(s1, second, tm_time->tm_sec / 10);
+    DRAW_DIGIT(s2, second, tm_time->tm_sec % 10);
+    DRAW_COLON(c1, colon1);
+    DRAW_COLON(c2, colon2);
 
     if (vtclock_bounce) {
       if (waitfor >= vtclock_bounce_delay) {
@@ -352,14 +352,14 @@ main(int argc, char **argv) {
       }
     }
 
-    mvwin(cl,y,x);
+    mvwin(cl, y, x);
     wnoutrefresh(cl);
     doupdate();
-    
+
     if (blinking_colons) {
       mydelay_half();
-      DRAW_BLANK_COLON(c1,colon1);
-      DRAW_BLANK_COLON(c2,colon2);
+      DRAW_BLANK_COLON(c1, colon1);
+      DRAW_BLANK_COLON(c2, colon2);
       wnoutrefresh(cl);
       doupdate();
     }
