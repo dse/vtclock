@@ -147,7 +147,8 @@ mydelay_half()
     gettimeofday(&curr, NULL);
     if (curr.tv_usec >= 500000)
       return;
-    small_sleep();
+    /* small_sleep(); */
+    pollkey();
   }
 }
 
@@ -377,8 +378,6 @@ main(int argc, char **argv) {
     wnoutrefresh(cl);
     doupdate();
 
-    pollkey();
-
     if (blinking_colons) {
       mydelay_half();
       DRAW_BLANK_COLON(c1, colon1);
@@ -386,7 +385,6 @@ main(int argc, char **argv) {
       wnoutrefresh(cl);
       doupdate();
 
-      pollkey();
     }
 
     mydelay();
