@@ -97,6 +97,11 @@ vtclock_config vtclock_config_3 = {
   &vtclock_font_3, &vtclock_font_3
 };
 
+vtclock_config vtclock_config_4 = {
+  &vtclock_font_2, &vtclock_font_2, &vtclock_font_2,
+  &vtclock_font_2, &vtclock_font_2
+};
+
 /* 0 = top; 1 = middle; 2 = bottom */
 #define VTCLOCK_ALIGN 0
 
@@ -187,7 +192,7 @@ usage() {
           "  -b  turn bouncing on (default)\n"
           "  -B  turn bouncing off\n"
           "  -d  # seconds between each bouncing step (default 30)\n"
-          "  -1, -2, -3, -4  select a font\n"
+          "  -1, -2, -3, -4, -5  select a font\n"
 	  "  -v  use inverse video for character drawing\n"
 	  "  -V  turn off inverse video\n"
 	  "  -k/-K  blinking colons on/off (default is off)\n"
@@ -225,7 +230,7 @@ main(int argc, char **argv) {
     extern int opterr;
     opterr = 1;
     optind = 1;
-    while ((ch = getopt(argc, argv, "hbBd:1234vVkK")) != -1) {
+    while ((ch = getopt(argc, argv, "hbBd:12345vVkK")) != -1) {
       switch (ch) {
       case 'h':
         usage();
@@ -250,6 +255,9 @@ main(int argc, char **argv) {
         break;
       case '4':
         config = &vtclock_config_3;
+        break;
+      case '5':
+        config = &vtclock_config_4;
         break;
       case 'v':
 	vtclock_inverse = 1;
@@ -287,7 +295,8 @@ main(int argc, char **argv) {
     + (config->colon1 ? config->colon1->colon_width : 0)
     + (config->colon2 ? config->colon2->colon_width : 0);
 
-  if ((LINES < cl_height) || (COLS < cl_width)) {
+  /* BUG WORKAROUND: cl_height + 2 instead of clheight */
+  if ((LINES < (cl_height + 2)) || (COLS < cl_width)) {
     endwin();
     fprintf(stderr, "(LINES=%d COLS=%d) screen too small!\n",
             LINES, COLS);
@@ -339,12 +348,17 @@ main(int argc, char **argv) {
         /* bouncy bouncy */
         futurex = x + leftright;
         futurey = y + updown;
-        if ((futurex < 0) || (futurex > (COLS - cl_width))) {
-          futurex = x + (leftright *= -1);
-        }
-        if ((futurey < 0) || (futurey > (LINES - cl_height))) {
-          futurey = y + (updown *= -1);
-        }
+	if ((futurex == 0) && (futurey == 0)) {
+	  futurex = x + (leftright *= -1);
+	  futurey = y + (updown *= -1);
+	} else {
+	  if ((futurex < 0) || (futurex > (COLS - cl_width))) {
+	    futurex = x + (leftright *= -1);
+	  }
+	  if ((futurey < 0) || (futurey > (LINES - cl_height))) {
+	    futurey = y + (updown *= -1);
+	  }
+	}
         x = futurex;
         y = futurey;
 
