@@ -262,16 +262,20 @@ main(int argc, char **argv) {
         exit(0);
 
       case 'c':
+	vtclock_inverse = 0;
 	vtclock_char = optarg[0];
 	break;
       case 'C':
+	vtclock_inverse = 0;
 	vtclock_char = 0;
 	break;
       case 'v':
 	vtclock_inverse = 1;
+	vtclock_char = 0;
 	break;
       case 'V':
 	vtclock_inverse = 0;
+	vtclock_char = 0;
 	break;
 
       case 'b':
