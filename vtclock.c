@@ -20,7 +20,7 @@
 #include <time.h>
 #include <ctype.h>
 
-#define VTCLOCK_BOUNCE 1
+#define VTCLOCK_BOUNCE 30
 
 /* VTCLOCK_INVERSE code is buggy right now. */
 #define VTCLOCK_INVERSE 0
