@@ -23,6 +23,7 @@
 #include "font0.h"
 #include "font1.h"
 #include "font2.h"
+#include "digitalfont0.h"
 
 #define AT_LEAST(a,b) do { if (a < b) a = b; } while(0)
 
@@ -70,6 +71,11 @@ typedef struct {
 vtclock_config vtclock_config_1 = {
   &vtclock_font_0,&vtclock_font_0,&vtclock_font_0,
   &vtclock_font_0,&vtclock_font_0
+};
+
+vtclock_config vtclock_digital_config_1 = {
+  &vtclock_digital_font_0,&vtclock_digital_font_0,&vtclock_digital_font_0,
+  &vtclock_digital_font_0,&vtclock_digital_font_0
 };
 
 vtclock_config vtclock_config_2 = {
@@ -210,7 +216,7 @@ main() {
     if (waitfor >= VTCLOCK_BOUNCE) {
       /* erase old */
       mvwin(cld, y, x);
-      wrefresh(cld);
+      wnoutrefresh(cld);
 
       /* bouncy bouncy */
       futurex = x + leftright;
@@ -228,7 +234,8 @@ main() {
     }
 
     mvwin(cl,y,x);
-    wrefresh(cl);
+    wnoutrefresh(cl);
+    refresh();
     mydelay();
     ++waitfor;
   }
