@@ -88,10 +88,10 @@ static vtclock_font vtclock_font_3 = {
 
   "   \n"
   " XX\n"
-  " XX\n"
   "   \n"
   "   \n"
+  "   \n"
   " XX\n"
-  " XX\n"
+  "   \n"
 };
 
