@@ -21,6 +21,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <stdlib.h>
 
 #include "font0.h"
 #include "font1.h"
@@ -176,7 +177,7 @@ vtclock_print_string(WINDOW *win, int y, int x,
     }
   else 
     {
-      mvwprintw(win, y, x, str);
+      mvwprintw(win, y, x, "%s", str);
     }
 }
 
@@ -221,18 +222,21 @@ main(int argc, char **argv) {
   vtclock_config *config = &vtclock_config_2;
 
   int cl_height, cl_width;
-  int y, x;                     /* position */
+  int y, x;                     /* clock window position */
   int startx, starty;           /* for placing sub-windows */
   int updown, leftright;        /* dy, dx */
   int futurex, futurey;         /* temp. for bounds checking */
   int waitfor = 0;              /* bouncing-related counter */
-
+  
   time_t t_time;
   struct tm *tm_time;           /* extract HH:MM:SS from here */
 
   int vtclock_bounce = 1;
   int vtclock_bounce_delay = 30;
   int blinking_colons = 0;
+
+  char *msg = NULL;
+  WINDOW *msgw = NULL;
 
   {
     int ch;
@@ -325,6 +329,12 @@ main(int argc, char **argv) {
     exit(3);
   }
 
+  if (LINES >= (cl_height + 4)) {
+    msg = (char *)malloc(cl_width + 1);
+    msg[0] = '\0';
+    cl_height += 2;
+  }
+  
   y = (LINES - cl_height) / 2;
   x = (COLS - cl_width) / 2;
 
@@ -346,6 +356,10 @@ main(int argc, char **argv) {
   MAKE_DIGIT_WINDOW(s1, second);
   MAKE_DIGIT_WINDOW(s2, second);
 
+  if (msg) {
+    msgw = subwin(cl, 1, cl_width, y + cl_height - 1, x);
+  }
+
   curs_set(0);
 
   while (1) {
@@ -360,7 +374,22 @@ main(int argc, char **argv) {
     DRAW_DIGIT(s2, second, tm_time->tm_sec % 10);
     DRAW_COLON(c1, colon1);
     DRAW_COLON(c2, colon2);
-
+    
+    if (msg) {
+      if ((strlen(msg) == 0) || ((time(NULL) % 5) == 0)) {
+	int x = 1 + rand() % 9;
+	int i;
+	for (i = 0; i < x; ++i) {
+	  msg[i] = '0' + i;
+	}
+	msg[x] = '\0';
+	/* clear the line */
+	mvwprintw(msgw, 0, 0, "%*s", cl_width, "");
+	/* display the new message */
+	mvwprintw(msgw, 0, (cl_width - strlen(msg)) / 2, "%s", msg);
+      }
+    }
+    
     if (vtclock_bounce) {
       if (waitfor >= vtclock_bounce_delay) {
         /* erase old */
@@ -384,7 +413,7 @@ main(int argc, char **argv) {
         x = futurex;
         y = futurey;
 
-        waitfor = 0;
+	waitfor = 0;
       }
     }
 
