@@ -312,9 +312,11 @@ main(int argc, char **argv) {
 	blinking_colons = 0;
 	break;
       case 'f':
+	show_message_line = 1;
 	is_pipe = 0;
 	break;
       case 'p':
+	show_message_line = 1;
 	is_pipe = 1;
 	break;
       case '?':
@@ -356,10 +358,11 @@ main(int argc, char **argv) {
     exit(3);
   }
 
-  if (LINES >= (cl_height + 4)) {
-    show_message_line = 1;
-    init_message(cl_width, argc, argv, is_pipe, vtclock_msg_delay);
-    cl_height += 2;
+  if (show_message_line) {
+    if (LINES >= (cl_height + 4)) {
+      init_message(cl_width, argc, argv, is_pipe, vtclock_msg_delay);
+      cl_height += 2;
+    }
   }
   
   y = (LINES - cl_height) / 2;
