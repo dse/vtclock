@@ -14,6 +14,7 @@ tar:
                 --exclude='.*~' \
 		--exclude='vtclock/vtclock' \
 		--exclude='*.o' \
+		--exclude='*.d' \
 	)
 .PHONY: install tar
 
