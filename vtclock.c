@@ -195,7 +195,6 @@ vtclock_print_blank_version_of_string(WINDOW *win, int y, int x, char *str)
 void
 usage() {
   fprintf(stderr,
-	  /*******************************************************************************/
 	  "usage: vtclock [option ...]\n"
 	  "  -h         help\n"
 	  "  -b/-B      turn bouncing on/off                             (default on)\n"
