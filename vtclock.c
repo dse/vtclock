@@ -31,6 +31,9 @@
 #include "digitalfont0.h"
 #include "msg.h"
 
+#include "vtclock.h"
+#include "figlet.h"
+
 void pollkey(void);
 
 #define AT_LEAST(a, b) do { if (a < b) a = b; } while(0)
@@ -73,14 +76,6 @@ void pollkey(void);
       vtclock_print_blank_version_of_string(sw, 0, 0, config->type->colon); \
     } \
   } while(0)
-
-typedef struct {
-  vtclock_font *hour;
-  vtclock_font *minute;
-  vtclock_font *second;
-  vtclock_font *colon1;
-  vtclock_font *colon2;
-} vtclock_config;
 
 vtclock_config vtclock_config_1 = {
   &vtclock_font_0, &vtclock_font_0, &vtclock_font_0,
@@ -255,7 +250,7 @@ main(int argc, char **argv) {
     extern int opterr;
     opterr = 1;
     optind = 1;
-    while ((ch = getopt(argc, argv, "hbBd:D:12345vVkKc:Cf:p:")) != -1) {
+    while ((ch = getopt(argc, argv, "hbBd:D:12345vVkKc:Cf:p:F")) != -1) {
       switch (ch) {
       case 'h':
         usage();
@@ -303,6 +298,9 @@ main(int argc, char **argv) {
       case '5':
         config = &vtclock_config_4;
         break;
+      case 'F':
+	config = generate_figlet_config();
+	break;
       case 'k':
 	blinking_colons = 1;
 	break;

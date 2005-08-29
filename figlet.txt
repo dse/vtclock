@@ -1,0 +1,34 @@
+figlet
+-f <filename>	with/without .flf suffix.  not full pathname: default dir searched, then current dir.
+-d <directory>	change default font directory
+
+change font	-f FILE	full pathname, or filename w/wo .flf suffix (run figlet -I2 to check default)
+			default fontdir searched, then current dir
+default fontdir	-d DIR	(run figlet -I3 to check default)
+justification	-c	center
+		-l	left
+		-r	right
+		-x	l-to-r or r-to-l (default)
+l-to-r/r-to-l	-L	print left-to-right
+		-R	print right-to-left
+		-X	use whatever font specifies
+output width	-t	terminal width
+		-w COLS	(default is 80)
+		-w 1	print each non-space character on a separate line
+\n handling	-p	paragraph mode (\n -> space, \n\n -> \n\n)
+		-n	normal mode 
+german charset	-D	[ \ ] { | } -> umlauted A O U a o u
+		-E	turn off german charset
+control files	-C FILE	specify control file
+		-N	clear control file list
+intercharacter	-s	smushing - as close as possible, with overlapping (default)
+spacing		-S	force smushing even if font says no
+		-k	kerning - as close as possible, without overlapping
+		-W	full-width
+layout mode	-m 1-63	
+information	-I-1	do normal operation
+		-v	same as -I0
+		-I0	show version/copyright info
+		-I1	show version as integer
+		-I2	show default font directory
+		-I3	show default font
