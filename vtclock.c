@@ -1,14 +1,10 @@
 /*
- * vtclock.c
- *
- * Program to display a large digital clock.
- *
- * Font "stolen" from figlet
+ * vtclock.c -- Program to display a large digital clock.
  *
  * Original code by Rob Hoeft.
  * Enhancements by Darren Embry.
+ * Fonts by Darren Embry.
  *
- * TODO: handle resize
  */
 
 #include <string.h>
@@ -207,6 +203,8 @@ usage() {
 	  "  -f <file>  shows one line at a time from filename\n"
 	  "  -p <cmd>   shows one line at a time from output of command  (via /bin/sh -c)\n"
 	  "  -D <secs>  delay between each message line                  (default 5 secs)\n"
+	  "  -F <font>  use a figlet font\n"
+	  "  -F -       use default figlet font\n"
           );
 }
 
@@ -218,6 +216,7 @@ main(int argc, char **argv) {
   WINDOW *cld;                  /* used to erase the clock */
 
   vtclock_config *config = &vtclock_config_2;
+  vtclock_config *temp_config;
 
   int cl_height, cl_width;
   int y, x;                     /* clock window position */
@@ -241,6 +240,10 @@ main(int argc, char **argv) {
   char *msg = NULL;
   WINDOW *msgw = NULL;
 
+  struct figlet_options the_figlet_options = {
+    font_name: NULL
+  };
+
   {
     int ch;
     extern char *optarg;
@@ -249,7 +252,7 @@ main(int argc, char **argv) {
     extern int opterr;
     opterr = 1;
     optind = 1;
-    while ((ch = getopt(argc, argv, "hbBd:D:12345vVkKc:Cf:p:F")) != -1) {
+    while ((ch = getopt(argc, argv, "hbBd:D:12345vVkKc:Cf:p:F:")) != -1) {
       switch (ch) {
       case 'h':
         usage();
@@ -298,7 +301,19 @@ main(int argc, char **argv) {
         config = &vtclock_config_4;
         break;
       case 'F':
-	config = generate_figlet_config();
+	if (optarg) {
+	  if (!strcmp(optarg, "-")) {
+	    if (the_figlet_options.font_name) {
+	      free(the_figlet_options.font_name);
+	      the_figlet_options.font_name = NULL;
+	    }
+	  } else {
+	    the_figlet_options.font_name = strdup(optarg);
+	  }
+	}
+	temp_config = generate_figlet_config(&the_figlet_options);
+	if (temp_config)
+	  config = temp_config;
 	break;
       case 'k':
 	blinking_colons = 1;
