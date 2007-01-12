@@ -1,0 +1,7 @@
+Stuff to do:
+- handle window size change
+- Use figlet font files
+- do nifty transition effects on the digits (scrolling, xdaliclock type thing)
+- accept user supplied date formats
+- analog mode
+- multi-terminal mode
