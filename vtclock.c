@@ -26,6 +26,7 @@
 #include "font3.h"
 #include "digitalfont0.h"
 #include "msg.h"
+#include "vtclock_config.h"
 
 #include "vtclock.h"
 #include "figlet.h"
@@ -103,6 +104,16 @@ vtclock_config vtclock_config_4 = {
 
 static int vtclock_inverse = 0;
 static char vtclock_char = 0;	/* always use this character, if set */
+
+void
+version()
+{
+	fprintf(stdout,
+		"vtclock %d.%d.%d\n",
+		vtclock_VERSION_MAJOR,
+		vtclock_VERSION_MINOR,
+		vtclock_VERSION_PATCH);
+}
 
 void
 small_sleep()
@@ -190,7 +201,7 @@ vtclock_print_blank_version_of_string(WINDOW *win, int y, int x, char *str)
 
 void
 usage() {
-  fprintf(stderr,
+  fprintf(stdout,
 	  "usage: vtclock [option ...]\n"
 	  "  -h         help\n"
 	  "  -b/-B      turn bouncing on/off                             (default on)\n"
@@ -206,6 +217,7 @@ usage() {
 	  "  -F <font>  use a figlet font\n"
 	  "  -F -       use default figlet font\n"
           );
+  version();
 }
 
 int
