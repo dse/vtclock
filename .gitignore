@@ -1,0 +1,7 @@
+.cvsignore
+.svnignore
+*.d
+*.o
+*~
+*.tar.gz
+vtclock
