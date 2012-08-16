@@ -10,7 +10,7 @@ It has lots of fancy display options.
 
 # Source Code
 
-- http://github.com/dse/vtclock/
+- https://github.com/dse/vtclock/
 
 # Stuff To Do
 
