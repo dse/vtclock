@@ -12,7 +12,7 @@ It has lots of fancy display options.
 
 - http://github.com/dse/vtclock/
 
-# Stuff To Do (a lot of this was from Robert Hoeft's original TODO)
+# Stuff To Do
 
 - handle window size change
 - Use figlet font files
@@ -20,4 +20,6 @@ It has lots of fancy display options.
 - accept user supplied date formats
 - analog mode
 - multi-terminal mode
+
+NOTE: A lot of this was from Robert Hoeft's original TODO.
 
