@@ -4,6 +4,19 @@ vtclock is a text-terminal program that displays a large analog clock.
 
 It has lots of fancy display options.
 
+# Compilation
+
+## Prerequisites
+
+### Ubuntu/Debian
+
+    sudo apt-get install libncurses5-dev make gcc
+
+## How To Compile
+
+    make
+    sudo make install
+
 # More Information
 
 - http://webonastick.com/vtclock/
