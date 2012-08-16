@@ -26,8 +26,6 @@
 #include "font3.h"
 #include "digitalfont0.h"
 #include "msg.h"
-#include "vtclock_config.h"
-
 #include "vtclock.h"
 #include "figlet.h"
 
@@ -110,9 +108,9 @@ version()
 {
 	fprintf(stdout,
 		"vtclock %d.%d.%d\n",
-		vtclock_VERSION_MAJOR,
-		vtclock_VERSION_MINOR,
-		vtclock_VERSION_PATCH);
+		VTCLOCK_VERSION_MAJOR,
+		VTCLOCK_VERSION_MINOR,
+		VTCLOCK_VERSION_PATCHLEVEL);
 }
 
 void

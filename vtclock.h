@@ -1,6 +1,14 @@
 #ifndef VTCLOCK__VTCLOCK_H
 #define VTCLOCK__VTCLOCK_H
 
+#define VTCLOCK_VERSION_MAJOR      0
+#define VTCLOCK_VERSION_MINOR      0
+#define VTCLOCK_VERSION_PATCHLEVEL 20120815
+
+#define VTCLOCK_VERSION            "0.0.20120815"
+#define VTCLOCK_COPYRIGHT_DATE     "2012"
+#define VTCLOCK_COPYRIGHT_HOLDER   "Darren Embry"
+
 #include "font.h"
 
 typedef struct {
