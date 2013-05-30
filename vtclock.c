@@ -160,7 +160,7 @@ vtclock_print_string(WINDOW *win, int y, int x,
   if (vtclock_inverse) 
     {
       char *p;
-      mvwin(win, y, x);
+      wmove(win, y, x);
       for (p = str; *p; ++p) {
 	if (iscntrl(*p)) {
 	  waddch(win, *p);
@@ -172,7 +172,7 @@ vtclock_print_string(WINDOW *win, int y, int x,
   else if (vtclock_char) 
     {
       char *p;
-      mvwin(win, y, x);
+      wmove(win, y, x);
       for (p = str; *p; ++p) {
 	waddch(win, iscntrl(*p) ? *p : isspace(*p) ? *p : vtclock_char);
       }
@@ -187,7 +187,7 @@ void
 vtclock_print_blank_version_of_string(WINDOW *win, int y, int x, char *str)
 {
   char *p;
-  mvwin(win, y, x);
+  wmove(win, y, x);
   for (p = str; *p; ++p) {
     if (iscntrl(*p)) {
       waddch(win, *p);
@@ -206,7 +206,7 @@ usage() {
 	  "  -d <secs>  delay between each bounce step                   (default 30 secs)\n"
 	  "  -1/-2/-3/-4/-5  select a font                               (default font #1)\n"
 	  "  -c <char>  use specified character for font drawing\n"
-	  "  -V         use bright solid inverse-video blocks\n"
+	  "  -v         use bright solid inverse-video blocks\n"
 	  "  -C/-V      use normal font drawing characters               (default)\n"
 	  "  -k/-K      blinking colons on/off                           (default off)\n"
 	  "  -f <file>  shows one line at a time from filename\n"
@@ -474,6 +474,7 @@ main(int argc, char **argv) {
 
     if (blinking_colons) {
       mydelay_half();
+      mvwin(cl, y, x);
       DRAW_BLANK_COLON(c1, colon1);
       DRAW_BLANK_COLON(c2, colon2);
       wnoutrefresh(cl);
