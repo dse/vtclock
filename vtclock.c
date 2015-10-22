@@ -206,7 +206,7 @@ usage() {
 	  "  -d <secs>  delay between each bounce step                   (default 30 secs)\n"
 	  "  -1/-2/-3/-4/-5  select a font                               (default font #1)\n"
 	  "  -c <char>  use specified character for font drawing\n"
-	  "  -V         use bright solid inverse-video blocks\n"
+	  "  -v         use bright solid inverse-video blocks\n"
 	  "  -C/-V      use normal font drawing characters               (default)\n"
 	  "  -k/-K      blinking colons on/off                           (default off)\n"
 	  "  -f <file>  shows one line at a time from filename\n"
