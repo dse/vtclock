@@ -147,8 +147,6 @@ sub make_digit_window {
     my ($self) = @_;
     my $w = $self->digit_width();
     my $h = $self->digit_height();
-    my $log = $self->{log};
-    printf $log ("$w $h\n");
     my $window = subwin($self->{cl},
 			$h, $w + 1,
 			$self->{starty},
@@ -161,8 +159,6 @@ sub make_colon_window {
     my ($self) = @_;
     my $w = $self->colon_width();
     my $h = $self->colon_height();
-    my $log = $self->{log};
-    printf $log ("$w $h\n");
     my $window = subwin($self->{cl},
 			$h, $w + 1,
 			$self->{starty},
@@ -189,12 +185,6 @@ sub delay {
 
 sub run {
     my ($self) = @_;
-
-    my $log;
-    open($log, ">", "vtclock.log");
-    select($log);
-    $| = 1;
-    $self->{log} = $log;
 
     initscr();
     cbreak();
@@ -232,8 +222,6 @@ sub run {
     $self->{cl}  = newwin($self->{cl_height}, $self->{cl_width}, $self->{y}, $self->{x});
     $self->{cld} = newwin($self->{cl_height}, $self->{cl_width}, $self->{y}, $self->{x});
 
-    printf $log ("%d %d %d %d to newwin\n", $self->{cl_height}, $self->{cl_width}, $self->{y}, $self->{x});
-
     $self->{h1} = $self->make_digit_window();
     $self->{h2} = $self->make_digit_window();
     $self->{c1} = $self->make_colon_window();
@@ -247,7 +235,6 @@ sub run {
 
     while (1) {
 	my $time_string = strftime("%H:%M:%S", localtime());
-	print $log "$time_string\n";
 
 	$self->draw_char($self->{h1}, substr($time_string, 0, 1));
 	$self->draw_char($self->{h2}, substr($time_string, 1, 1));
