@@ -10,100 +10,106 @@ sub new {
     my ($class, @args) = @_;
     my $self = {};
     bless($self, $class);
+    $self->init();
     return $self;
 }
 
-my $CHARS;
+my $DEFAULT_CHARS;
 BEGIN {
-    $CHARS = {
-	"0" => [" XXX ",
-		"X   X",
-		"X  xx",
-		"x x x",
-		"xx  x",
-		"x   x",
-		" xxx "],
-	"1" => ["  x  ",
-		" xx  ",
-		"  x  ",
-		"  x  ",
-		"  x  ",
-		"  x  ",
-		" xxx "],
-	"2" => [" xxx ",
-		"x   x",
-		"    x",
-		"   x ",
-		"  x  ",
-		" x   ",
-		"xxxxx"],
-	"3" => ["xxxxx",
-		"   x ",
-		"  x  ",
-		"   x ",
-		"    x",
-		"x   x",
-		" xxx "],
-	"4" => ["   x ",
-		"  xx ",
-		" x x ",
-		"x  x ",
-		"xxxxx",
-		"   x ",
-		"   x "],
-	"5" => ["xxxxx",
-		"x    ",
-		"xxxx ",
-		"    x",
-		"    x",
-		"x   x",
-		" xxx "],
-	"6" => ["  xx ",
-		" x   ",
-		"x    ",
-		"xxxx ",
-		"x   x",
-		"x   x",
-		" xxx "],
-	"7" => ["xxxxx",
-		"    x",
-		"   x ",
-		"  x  ",
-		" x   ",
-		" x   ",
-		" x   "],
-	"8" => [" xxx ",
-		"x   x",
-		"x   x",
-		" xxx ",
-		"x   x",
-		"x   x",
-		" xxx "],
-	"9" => [" xxx ",
-		"x   x",
-		"x   x",
-		" xxxx",
-		"    x",
-		"   x ",
-		" xx  "],
+    $DEFAULT_CHARS = {
+	"0" => [" ### ",
+		"#   #",
+		"#  ##",
+		"# # #",
+		"##  #",
+		"#   #",
+		" ### "],
+	"1" => ["  #  ",
+		" ##  ",
+		"  #  ",
+		"  #  ",
+		"  #  ",
+		"  #  ",
+		" ### "],
+	"2" => [" ### ",
+		"#   #",
+		"    #",
+		"   # ",
+		"  #  ",
+		" #   ",
+		"#####"],
+	"3" => ["#####",
+		"   # ",
+		"  #  ",
+		"   # ",
+		"    #",
+		"#   #",
+		" ### "],
+	"4" => ["   # ",
+		"  ## ",
+		" # # ",
+		"#  # ",
+		"#####",
+		"   # ",
+		"   # "],
+	"5" => ["#####",
+		"#    ",
+		"#### ",
+		"    #",
+		"    #",
+		"#   #",
+		" ### "],
+	"6" => ["  ## ",
+		" #   ",
+		"#    ",
+		"#### ",
+		"#   #",
+		"#   #",
+		" ### "],
+	"7" => ["#####",
+		"    #",
+		"   # ",
+		"  #  ",
+		" #   ",
+		" #   ",
+		" #   "],
+	"8" => [" ### ",
+		"#   #",
+		"#   #",
+		" ### ",
+		"#   #",
+		"#   #",
+		" ### "],
+	"9" => [" ### ",
+		"#   #",
+		"#   #",
+		" ####",
+		"    #",
+		"   # ",
+		" ##  "],
 	":" => [" ",
 		" ",
-		"x",
+		"#",
 		" ",
-		"x",
+		"#",
 		" ",
 		" "],
     };
 }
 
+sub init {
+    my ($self) = @_;
+    $self->{chars} = $DEFAULT_CHARS;
+}
+
 sub char_width {
     my ($self, $char) = @_;
-    return max map { length($_) } @{$CHARS->{$char}};
+    return max map { length($_) } @{$self->{chars}->{$char}};
 }
 
 sub char_height {
     my ($self, $char) = @_;
-    return scalar @{$CHARS->{$char}};
+    return scalar @{$self->{chars}->{$char}};
 }
 
 sub max_char_width {
@@ -162,9 +168,7 @@ sub make_colon_window {
 
 sub draw_char {
     my ($self, $w, $char) = @_;
-    my $string = join("\n", @{$CHARS->{$char}});
-
-    # mvwin($w, 0, 0);
+    my $string = join("\n", @{$self->{chars}->{$char}});
     addstr($w, 0, 0, $string);
 }
 
@@ -174,6 +178,63 @@ sub delay {
     my ($self) = @_;
     my ($sec, $usec) = gettimeofday();
     usleep(1000000 - $usec);
+}
+
+sub delay_to_half_second {
+    my ($self) = @_;
+    my ($sec, $usec) = gettimeofday();
+    if ($usec >= 500000) {
+	return;
+    }
+    usleep(500000 - $usec);
+}
+
+sub set_figlet_font {
+    my ($self, $font) = @_;
+
+    # in OS X, cpan-installed Text::FIGlet won't find fonts from
+    # brew-installed figlet package.
+    if ($^O eq "darwin") {
+	if (-d "/usr/local/share/figlet/fonts") {
+	    $ENV{FIGLIB} = "/usr/local/share/figlet/fonts";
+	}
+    }
+
+    require Text::FIGlet;
+    my $figlet = Text::FIGlet->new();
+
+    # initialize
+    $self->{chars} = {};
+    my %char_length;
+
+    foreach my $char ("0" .. "9", ":") {
+	my $figify = $figlet->figify(-A => $char);
+	my @figify = split("\n", $figify);
+
+	# make sure all lines are the same length, by padding with
+	# spaces where needed.
+	my $max_length = max map { length $_ } @figify;
+	foreach (@figify) {
+	    $_ .= " " x ($max_length - length($_));
+	}
+
+	$char_length{$char} = $max_length;
+    	$self->{chars}->{$char} = \@figify;
+    }
+
+    # make sure all digits are the same width, by padding with spaces
+    # on both sides as needed.
+    my $digit_width = max map { $char_length{$_} } "0".."9";
+    print("Digit width: $digit_width\n");
+
+    foreach my $char ("0".."9") {
+	foreach (@{$self->{chars}->{$char}}) {
+	    $len = $digit_width - length($_);
+	    $l = int($len / 2);
+	    $r = $len - $l;
+	    $_ = (" " x $l) . $_ . (" " x $r);
+	}
+    }
 }
 
 sub run {
@@ -190,7 +251,8 @@ sub run {
 	CORE::die(@_);
     };
 
-    $self->{space} = 2;
+    # defaults
+    $self->{space} //= 1;
 
     $self->{cl_height} = $self->max_char_height("0" .. "9", ":");
     $self->{cl_width} = $self->digit_width() * 6 + $self->colon_width() * 2 + $self->{space} * 7 + 1;
@@ -226,6 +288,10 @@ sub run {
 
     curs_set(0);
 
+    my $futurex;		# temporary for bounds checking
+    my $futurey;
+    my $waitfor = 0;		# bouncing-related counter
+
     while (1) {
 	my $time_string = strftime("%H:%M:%S", localtime());
 
@@ -238,12 +304,52 @@ sub run {
 	$self->draw_char($self->{s1}, substr($time_string, 6, 1));
 	$self->draw_char($self->{s2}, substr($time_string, 7, 1));
 
+	if ($self->{bounce}) {
+	    if ($waitfor >= $self->{bounce}) {
+
+		# erase old
+		mvwin($self->{cld}, $self->{y}, $self->{x});
+		noutrefresh($self->{cld});
+
+		$futurex = $self->{x} + $self->{leftright};
+		$futurey = $self->{y} + $self->{updown};
+
+		if ($futurex == 0 && $futurey == 0) {
+		    $futurex = $self->{x} + ($self->{leftright} *= -1);
+		    $futurey = $self->{y} + ($self->{updown}    *= -1);
+		} else {
+		    if ($futurex < 0 ||
+			  $futurex > (COLS() - $self->{cl_width})) {
+			$futurex = $self->{x} + ($self->{leftright} *= -1);
+		    }
+		    if ($futurey < 0 ||
+			  $futurey > (LINES() - $self->{cl_height})) {
+			$futurey = $self->{y} + ($self->{updown}    *= -1);
+		    }
+		}
+
+		$self->{x} = $futurex;
+		$self->{y} = $futurey;
+		$waitfor = 0;
+	    }
+	}
+
 	mvwin($self->{cl}, $self->{y}, $self->{x});
 	noutrefresh($self->{cl});
 	doupdate();
 
+	if ($self->{blinking_colons}) {
+	    $self->delay_to_half_second();
+	    erase($self->{c1});
+	    erase($self->{c2});
+	    touchwin($self->{cl});
+	    noutrefresh($self->{cl});
+	    doupdate();
+	}
+
 	$self->pollkey();
 	$self->delay();
+	++$waitfor;
     }
 
     endwin();
