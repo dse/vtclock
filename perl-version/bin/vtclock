@@ -5,8 +5,45 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
+my $char         = undef;
+my $bounce       = undef;
+my $figlet_font  = undef;
+my $bounce_delay = 30;
+my $blink        = undef;
+my $space        = undef;
+
+use Getopt::Long;
+Getopt::Long::Configure("bundling", "gnu_compat");
+Getopt::Long::GetOptions("c|char=s"             => \$char,
+			 "b|bounce"             => \$bounce,
+			 "d|delay|bounce-delay" => \$bounce_delay,
+			 "k|blink"              => \$blink,
+			 "K|no-blink"           => sub { $blink = 0; },
+			 "F|figlet-font=s"      => \$figlet_font,
+			 "s|space=i"            => \$space,
+			 "h|help" => sub { usage(); exit(0); });
+
+sub usage { print <<"END"; }
+usage:
+  vtclock [OPTION ...]
+options:
+  -c, --char=CHAR
+  -b, --bounce
+  -d, --bounce-delay=SECS  (default = 30)
+  -k, --blink
+  -K, --no-blink
+  -F, --figlet-font=NAME
+  -s, --space=NUMBER
+  -h, --help
+END
+
 use Term::VTClock;
 
 my $vtclock = Term::VTClock->new();
+$vtclock->{char} = $char if defined $char;
+$vtclock->{blinking_colons} = $blink if $blink;
+$vtclock->{bounce} = $bounce ? $bounce_delay : 0;
+$vtclock->set_figlet_font($figlet_font) if defined $figlet_font;
+$vtclock->{space} = $space if $space;
 $vtclock->run();
 
