@@ -15,7 +15,67 @@ sub new {
 }
 
 my $DEFAULT_CHARS;
+my $BUILTIN_FONTS;
 BEGIN {
+    $BUILTIN_FONTS = {
+	"seven-segment" => {
+	    "0" => [" ___ ",
+		    "|   |",
+		    "|   |",
+		    "|   |",
+		    "|___|"],
+	    "1" => ["     ",
+		    "    |",
+		    "    |",
+		    "    |",
+		    "    |"],
+	    "2" => [" ___ ",
+		    "    |",
+		    " ___|",
+		    "|    ",
+		    "|___ "],
+	    "3" => [" ___ ",
+		    "    |",
+		    " ___|",
+		    "    |",
+		    " ___|"],
+	    "4" => ["     ",
+		    "|   |",
+		    "|___|",
+		    "    |",
+		    "    |"],
+	    "5" => [" ___ ",
+		    "|    ",
+		    "|___ ",
+		    "    |",
+		    " ___|"],
+	    "6" => [" ___ ",
+		    "|    ",
+		    "|___ ",
+		    "|   |",
+		    "|___|"],
+	    "7" => [" ___ ",
+		    "    |",
+		    "    |",
+		    "    |",
+		    "    |"],
+	    "8" => [" ___ ",
+		    "|   |",
+		    "|___|",
+		    "|   |",
+		    "|___|"],
+	    "9" => [" ___ ",
+		    "|   |",
+		    "|___|",
+		    "    |",
+		    "    |"],
+	    ":" => ["   ",
+		    " : ",
+		    "   ",
+		    " : ",
+		    "   "]
+	   }
+       };
     $DEFAULT_CHARS = {
 	"0" => [" ### ",
 		"#   #",
@@ -169,6 +229,10 @@ sub make_colon_window {
 sub draw_char {
     my ($self, $w, $char) = @_;
     my $string = join("\n", @{$self->{chars}->{$char}});
+    if (defined $self->{char} && length $self->{char}) {
+	my $char = substr($self->{char}, 0, 1);
+	$string =~ s{\S}{$char}g;
+    }
     addstr($w, 0, 0, $string);
 }
 
@@ -201,7 +265,7 @@ sub set_figlet_font {
     }
 
     require Text::FIGlet;
-    my $figlet = Text::FIGlet->new();
+    my $figlet = Text::FIGlet->new((defined $font) ? (-f => $font) : ());
 
     # initialize
     $self->{chars} = {};
