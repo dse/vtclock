@@ -14,7 +14,6 @@ sub new {
     return $self;
 }
 
-my $DEFAULT_CHARS;
 my $BUILTIN_FONTS;
 BEGIN {
     $BUILTIN_FONTS = {
@@ -74,92 +73,98 @@ BEGIN {
 		    "   ",
 		    " : ",
 		    "   "]
-	   }
+	   },
+	"standard" => {
+	    "0" => [" ### ",
+		    "#   #",
+		    "#  ##",
+		    "# # #",
+		    "##  #",
+		    "#   #",
+		    " ### "],
+	    "1" => ["  #  ",
+		    " ##  ",
+		    "  #  ",
+		    "  #  ",
+		    "  #  ",
+		    "  #  ",
+		    " ### "],
+	    "2" => [" ### ",
+		    "#   #",
+		    "    #",
+		    "   # ",
+		    "  #  ",
+		    " #   ",
+		    "#####"],
+	    "3" => ["#####",
+		    "   # ",
+		    "  #  ",
+		    "   # ",
+		    "    #",
+		    "#   #",
+		    " ### "],
+	    "4" => ["   # ",
+		    "  ## ",
+		    " # # ",
+		    "#  # ",
+		    "#####",
+		    "   # ",
+		    "   # "],
+	    "5" => ["#####",
+		    "#    ",
+		    "#### ",
+		    "    #",
+		    "    #",
+		    "#   #",
+		    " ### "],
+	    "6" => ["  ## ",
+		    " #   ",
+		    "#    ",
+		    "#### ",
+		    "#   #",
+		    "#   #",
+		    " ### "],
+	    "7" => ["#####",
+		    "    #",
+		    "   # ",
+		    "  #  ",
+		    " #   ",
+		    " #   ",
+		    " #   "],
+	    "8" => [" ### ",
+		    "#   #",
+		    "#   #",
+		    " ### ",
+		    "#   #",
+		    "#   #",
+		    " ### "],
+	    "9" => [" ### ",
+		    "#   #",
+		    "#   #",
+		    " ####",
+		    "    #",
+		    "   # ",
+		    " ##  "],
+	    ":" => [" ",
+		    " ",
+		    "#",
+		    " ",
+		    "#",
+		    " ",
+		    " "],
+	}
        };
-    $DEFAULT_CHARS = {
-	"0" => [" ### ",
-		"#   #",
-		"#  ##",
-		"# # #",
-		"##  #",
-		"#   #",
-		" ### "],
-	"1" => ["  #  ",
-		" ##  ",
-		"  #  ",
-		"  #  ",
-		"  #  ",
-		"  #  ",
-		" ### "],
-	"2" => [" ### ",
-		"#   #",
-		"    #",
-		"   # ",
-		"  #  ",
-		" #   ",
-		"#####"],
-	"3" => ["#####",
-		"   # ",
-		"  #  ",
-		"   # ",
-		"    #",
-		"#   #",
-		" ### "],
-	"4" => ["   # ",
-		"  ## ",
-		" # # ",
-		"#  # ",
-		"#####",
-		"   # ",
-		"   # "],
-	"5" => ["#####",
-		"#    ",
-		"#### ",
-		"    #",
-		"    #",
-		"#   #",
-		" ### "],
-	"6" => ["  ## ",
-		" #   ",
-		"#    ",
-		"#### ",
-		"#   #",
-		"#   #",
-		" ### "],
-	"7" => ["#####",
-		"    #",
-		"   # ",
-		"  #  ",
-		" #   ",
-		" #   ",
-		" #   "],
-	"8" => [" ### ",
-		"#   #",
-		"#   #",
-		" ### ",
-		"#   #",
-		"#   #",
-		" ### "],
-	"9" => [" ### ",
-		"#   #",
-		"#   #",
-		" ####",
-		"    #",
-		"   # ",
-		" ##  "],
-	":" => [" ",
-		" ",
-		"#",
-		" ",
-		"#",
-		" ",
-		" "],
-    };
 }
 
 sub init {
     my ($self) = @_;
-    $self->{chars} = $DEFAULT_CHARS;
+    $self->{chars} = $BUILTIN_FONTS->{standard};
+}
+
+sub use_builtin_font {
+    my ($self, $font) = @_;
+    $font //= "standard";
+    $self->{chars} = $BUILTIN_FONTS->{$font} if exists $BUILTIN_FONTS->{$font};
 }
 
 sub char_width {
@@ -301,9 +306,9 @@ sub set_figlet_font {
     }
 }
 
-sub run {
+sub init_clock {
     my ($self) = @_;
-
+    
     initscr();
     cbreak();
     noecho();
@@ -352,10 +357,12 @@ sub run {
 
     curs_set(0);
 
-    my $futurex;		# temporary for bounds checking
-    my $futurey;
-    my $waitfor = 0;		# bouncing-related counter
+    $self->{bounce_counter} = 0;
+}
 
+sub run_clock_loop {
+    my ($self) = @_;
+    
     while (1) {
 	my $time_string = strftime("%H:%M:%S", localtime());
 
@@ -369,14 +376,14 @@ sub run {
 	$self->draw_char($self->{s2}, substr($time_string, 7, 1));
 
 	if ($self->{bounce}) {
-	    if ($waitfor >= $self->{bounce}) {
+	    if ($self->{bounce_counter} >= $self->{bounce}) {
 
 		# erase old
 		mvwin($self->{cld}, $self->{y}, $self->{x});
 		noutrefresh($self->{cld});
 
-		$futurex = $self->{x} + $self->{leftright};
-		$futurey = $self->{y} + $self->{updown};
+		my $futurex = $self->{x} + $self->{leftright};
+		my $futurey = $self->{y} + $self->{updown};
 
 		if ($futurex == 0 && $futurey == 0) {
 		    $futurex = $self->{x} + ($self->{leftright} *= -1);
@@ -394,7 +401,7 @@ sub run {
 
 		$self->{x} = $futurex;
 		$self->{y} = $futurey;
-		$waitfor = 0;
+		$self->{bounce_counter} = 0;
 	    }
 	}
 
@@ -413,9 +420,16 @@ sub run {
 
 	$self->pollkey();
 	$self->delay();
-	++$waitfor;
+	++$self->{bounce_counter};
     }
+}
 
+sub run {
+    my ($self) = @_;
+
+    $self->init_clock();
+    $self->run_clock_loop();
+    $self->end_clock();
     endwin();
 }
 
