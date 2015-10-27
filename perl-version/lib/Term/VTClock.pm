@@ -245,17 +245,17 @@ use Time::HiRes qw(usleep gettimeofday);
 
 sub delay {
     my ($self) = @_;
-    my ($sec, $usec) = gettimeofday();
-    usleep(1000000 - $usec);
+    my $time = time();
+    do {
+	$self->pollkey();
+    } while (time() == $time);
 }
 
 sub delay_to_half_second {
     my ($self) = @_;
-    my ($sec, $usec) = gettimeofday();
-    if ($usec >= 500000) {
-	return;
+    while ( (gettimeofday())[1] < 500000 ) {
+	$self->pollkey();
     }
-    usleep(500000 - $usec);
 }
 
 sub set_figlet_font {
@@ -424,13 +424,29 @@ sub run_clock_loop {
     }
 }
 
+sub end_clock {
+    my ($self) = @_;
+
+    delwin($self->{h1});	delete $self->{h1};
+    delwin($self->{h2});	delete $self->{h2};
+    delwin($self->{c1});	delete $self->{c1};
+    delwin($self->{m1});	delete $self->{m1};
+    delwin($self->{m2});	delete $self->{m2};
+    delwin($self->{c2});	delete $self->{c2};
+    delwin($self->{s1});	delete $self->{s1};
+    delwin($self->{s2});	delete $self->{s2};
+    delwin($self->{cld});	delete $self->{cld};
+    delwin($self->{cl});	delete $self->{cl};
+
+    endwin();
+}
+
 sub run {
     my ($self) = @_;
 
     $self->init_clock();
     $self->run_clock_loop();
     $self->end_clock();
-    endwin();
 }
 
 sub pollkey {
