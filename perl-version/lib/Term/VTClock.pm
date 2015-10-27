@@ -438,6 +438,8 @@ sub end_clock {
     delwin($self->{cld});	delete $self->{cld};
     delwin($self->{cl});	delete $self->{cl};
 
+    delete $SIG{__DIE__};
+
     endwin();
 }
 
@@ -455,6 +457,10 @@ sub pollkey {
     if ($key eq chr(12) || $key eq chr(18) || $key eq KEY_REFRESH) {
 	redrawwin(curscr);
 	refresh(curscr);
+    }
+    if ($key eq KEY_RESIZE) {
+	$self->end_clock();
+	$self->init_clock();
     }
 }
 
