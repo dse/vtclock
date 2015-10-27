@@ -310,6 +310,10 @@ sub init_clock {
     my ($self) = @_;
     
     initscr();
+
+    clear();			# for restarts
+    refresh();
+
     cbreak();
     noecho();
     nonl();
