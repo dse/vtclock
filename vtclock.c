@@ -157,6 +157,7 @@ void
 vtclock_print_string(WINDOW *win, int y, int x,
                      char *str)
 {
+  wclear(win); /* Fixes -v and -c mode screen over-writing */
   if (vtclock_inverse) 
     {
       char *p;
@@ -187,6 +188,7 @@ void
 vtclock_print_blank_version_of_string(WINDOW *win, int y, int x, char *str)
 {
   char *p;
+  wclear(win); /* Fixes screen over-writing in -v and -c modes */
   mvwin(win, y, x);
   for (p = str; *p; ++p) {
     if (iscntrl(*p)) {
@@ -474,6 +476,7 @@ main(int argc, char **argv) {
 
     if (blinking_colons) {
       mydelay_half();
+      mvwin(cl, y, x); /* Position the blank colon */
       DRAW_BLANK_COLON(c1, colon1);
       DRAW_BLANK_COLON(c2, colon2);
       wnoutrefresh(cl);
