@@ -1,5 +1,5 @@
 # vtclock - a text-mode giant digital clock
-# Copyright (C) 2012 Darren Embry.  
+# Copyright (C) 2016 Darren Embry.  
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
