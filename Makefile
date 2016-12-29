@@ -24,6 +24,7 @@ manpage =
 
 VERSION = $(shell sed -n '/^\#define[ 	][ 	]*VTCLOCK_VERSION[ 	][ 	]*"/{s/^[^"]*"//;s/".*$$//;p;}' vtclock.h)
 DEBPKGS = pkg-config libncurses5-dev gcc
+TAR = $(shell if which gtar >/dev/null 2>/dev/null ; then echo gtar ; else echo tar ; fi)
 
 ###############################################################################
 
@@ -100,10 +101,10 @@ DIST = $(program)-$(VERSION).tar.gz
 
 .PHONY: dist
 dist:
-	tar cvvzf $(DIST) \
+	$(TAR) cvvzf $(DIST) \
 		--transform='s:^:$(program)-$(VERSION)/:' \
 		--show-transformed-names \
-		* \
+		--exclude=perl-version \
 		--exclude=MyMakefile \
 		--exclude=CVS \
 		--exclude=.svn \
@@ -126,7 +127,8 @@ dist:
 		--exclude='*.tar.gz' \
 		--exclude='*.tmp.*' \
 		--exclude='*.tmp' \
-		--exclude='*.log'
+		--exclude='*.log' \
+		*
 
 .PHONY: clean
 clean:
