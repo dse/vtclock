@@ -35,8 +35,19 @@ ifdef manpage
 .SUFFIXES: .1 .1.txt .1.ps .1.html .ps .pdf
 endif
 
+EXTRA_CFLAGS =
+EXTRA_LIBS   = 
+
 PKGCONFIG_CFLAGS = `pkg-config --cflags $(PKGCONFIG_PKGS)`
 PKGCONFIG_LIBS   = `pkg-config --libs   $(PKGCONFIG_PKGS)`
+
+ifeq (0,$(shell pkg-config --cflags ncurses >/dev/null 2>/dev/null))
+else
+  PKGCONFIG_CFLAGS =
+  PKGCONFIG_LIBS   =
+  EXTRA_CFLAGS =
+  EXTRA_LIBS = -lncurses
+endif
 
 # Common prefix for installation directories.
 # NOTE: This directory must exist when you start the install.
@@ -57,10 +68,10 @@ INSTALL_MKDIR   = $(INSTALL) -d
 all: $(program)
 
 $(program): $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(PKGCONFIG_LIBS) $(CFLAGS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(PKGCONFIG_LIBS) $(EXTRA_LIBS) $(CFLAGS)
 
 %.o: %.c
-	$(CC) -c $(CPPFLAGS) $(PKGCONFIG_CFLAGS) $(CFLAGS) $<
+	$(CC) -c $(CPPFLAGS) $(PKGCONFIG_CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS) $<
 
 %.d: %.c
 	@ >&2 echo Fixing dependencies for $< . . .
