@@ -1,6 +1,7 @@
 # vtclock
 
-vtclock is a text-terminal program that displays a large analog clock.
+vtclock is a text-terminal program that displays a large digital
+clock.
 
 It has lots of fancy display options.
 
