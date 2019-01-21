@@ -11,6 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #include "vtclock.h"
 #include "font.h"
