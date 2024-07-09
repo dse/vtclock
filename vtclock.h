@@ -3,9 +3,9 @@
 
 #define VTCLOCK_VERSION_MAJOR      0
 #define VTCLOCK_VERSION_MINOR      99
-#define VTCLOCK_VERSION_PATCHLEVEL 0
+#define VTCLOCK_VERSION_PATCHLEVEL 1
 
-#define VTCLOCK_VERSION            "0.99.0"
+#define VTCLOCK_VERSION            "0.99.1"
 #define VTCLOCK_COPYRIGHT_DATE     "2024"
 #define VTCLOCK_COPYRIGHT_HOLDER   "Darren Embry"
 
