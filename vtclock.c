@@ -434,15 +434,6 @@ main(int argc, char **argv) {
     DRAW_COLON(c1, colon1);
     DRAW_COLON(c2, colon2);
 
-    /* when bouncing, don't move the clock on :00s */
-    if (vtclock_bounce) {
-      if (tm_time->tm_sec != 0) {
-        ++waitfor;
-      }
-    } else {
-      ++waitfor;
-    }
-    
     if (show_message_line) {
       char *msg = get_next_message();
       if (msg != NULL) {
@@ -454,29 +445,35 @@ main(int argc, char **argv) {
     }
     
     if (vtclock_bounce) {
+      ++waitfor;
       if (waitfor >= vtclock_bounce_delay) {
-        /* erase old */
-        mvwin(cld, y, x);
-        wnoutrefresh(cld);
-
-        /* bouncy bouncy */
-        futurex = x + leftright;
-        futurey = y + updown;
-        if ((futurex == 0) && (futurey == 0)) {
-          futurex = x + (leftright *= -1);
-          futurey = y + (updown *= -1);
+        if (tm_time->tm_sec == 0) {
+          /* don't move the clock on :00 - this can be slow */
+          waitfor = vtclock_bounce_delay - 1;
         } else {
-          if ((futurex < 0) || (futurex > (COLS - cl_width))) {
-            futurex = x + (leftright *= -1);
-          }
-          if ((futurey < 0) || (futurey > (LINES - cl_height))) {
-            futurey = y + (updown *= -1);
-          }
-        }
-        x = futurex;
-        y = futurey;
+          /* erase old */
+          mvwin(cld, y, x);
+          wnoutrefresh(cld);
 
-        waitfor = 0;
+          /* bouncy bouncy */
+          futurex = x + leftright;
+          futurey = y + updown;
+          if ((futurex == 0) && (futurey == 0)) {
+            futurex = x + (leftright *= -1);
+            futurey = y + (updown *= -1);
+          } else {
+            if ((futurex < 0) || (futurex > (COLS - cl_width))) {
+              futurex = x + (leftright *= -1);
+            }
+            if ((futurey < 0) || (futurey > (LINES - cl_height))) {
+              futurey = y + (updown *= -1);
+            }
+          }
+          x = futurex;
+          y = futurey;
+
+          waitfor = 0;
+        }
       }
     }
 
