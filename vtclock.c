@@ -122,13 +122,14 @@ small_sleep()
   select(0, NULL, NULL, NULL, &timeout);
 }
 
+struct timeval prev;
+struct timeval curr;
+
 void
 mydelay()
 /* sleep until second changes.  works via polling.  close enough
    for government work. */
 {
-  static struct timeval prev;
-  static struct timeval curr;
   gettimeofday(&prev, NULL);
   while (1) {
     gettimeofday(&curr, NULL);
@@ -144,7 +145,6 @@ mydelay_half()
 /* sleep until the half-second mark.  also works via polling.
    also close enough for government work. */
 {
-  static struct timeval curr;
   while (1) {
     gettimeofday(&curr, NULL);
     if (curr.tv_usec >= 500000)
@@ -421,8 +421,7 @@ main(int argc, char **argv) {
   curs_set(0);
 
   while (1) {
-    time(&t_time);
-    tm_time = localtime(&t_time);
+    tm_time = localtime(&(curr.tv_sec));
 
     DRAW_DIGIT(h1, hour, tm_time->tm_hour / 10);
     DRAW_DIGIT(h2, hour, tm_time->tm_hour % 10);
