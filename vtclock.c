@@ -33,43 +33,43 @@ void pollkey(void);
 
 #define AT_LEAST(a, b) do { if (a < b) a = b; } while(0)
 
-#define MAKE_DIGIT_WINDOW(sw, type) \
-  do { \
-    if (config->type) { \
+#define MAKE_DIGIT_WINDOW(sw, type)                                     \
+  do {                                                                  \
+    if (config->type) {                                                 \
       sw = subwin(cl, config->type->digit_height, config->type->digit_width, \
                   starty + (VTCLOCK_ALIGN * (cl_height - config->type->digit_height) / 2), startx); \
-      startx += config->type->digit_width; \
-    } else { \
-      sw = NULL; \
-    } \
+      startx += config->type->digit_width;                              \
+    } else {                                                            \
+      sw = NULL;                                                        \
+    }                                                                   \
   } while(0)
-#define MAKE_COLON_WINDOW(sw, type) \
-  do { \
-    if (config->type) { \
+#define MAKE_COLON_WINDOW(sw, type)                                     \
+  do {                                                                  \
+    if (config->type) {                                                 \
       sw = subwin(cl, config->type->digit_height, config->type->colon_width, \
                   starty + (VTCLOCK_ALIGN * (cl_height - config->type->digit_height) / 2), startx); \
-      startx += config->type->colon_width; \
-    } else { \
-      sw = NULL; \
-    } \
+      startx += config->type->colon_width;                              \
+    } else {                                                            \
+      sw = NULL;                                                        \
+    }                                                                   \
   } while(0)
-#define DRAW_DIGIT(sw, type, digit) \
-  do { \
-    if (sw) { \
-      vtclock_print_string(sw, 0, 0, config->type->digits[digit]); \
-    } \
+#define DRAW_DIGIT(sw, type, digit)                                 \
+  do {                                                              \
+    if (sw) {                                                       \
+      vtclock_print_string(sw, 0, 0, config->type->digits[digit]);  \
+    }                                                               \
   } while(0)
-#define DRAW_COLON(sw, type) \
-  do { \
-    if (sw) { \
-      vtclock_print_string(sw, 0, 0, config->type->colon); \
-    } \
+#define DRAW_COLON(sw, type)                                \
+  do {                                                      \
+    if (sw) {                                               \
+      vtclock_print_string(sw, 0, 0, config->type->colon);  \
+    }                                                       \
   } while(0)
-#define DRAW_BLANK_COLON(sw, type) \
-  do { \
-    if (sw) { \
+#define DRAW_BLANK_COLON(sw, type)                                      \
+  do {                                                                  \
+    if (sw) {                                                           \
       vtclock_print_blank_version_of_string(sw, 0, 0, config->type->colon); \
-    } \
+    }                                                                   \
   } while(0)
 
 vtclock_config vtclock_config_1 = {
@@ -101,16 +101,16 @@ vtclock_config vtclock_config_4 = {
 #define VTCLOCK_ALIGN 0
 
 static int vtclock_inverse = 0;
-static char vtclock_char = 0;	/* always use this character, if set */
+static char vtclock_char = 0; /* always use this character, if set */
 
 void
 version()
 {
-	fprintf(stdout,
-		"vtclock %d.%d.%d\n",
-		VTCLOCK_VERSION_MAJOR,
-		VTCLOCK_VERSION_MINOR,
-		VTCLOCK_VERSION_PATCHLEVEL);
+  fprintf(stdout,
+          "vtclock %d.%d.%d\n",
+          VTCLOCK_VERSION_MAJOR,
+          VTCLOCK_VERSION_MINOR,
+          VTCLOCK_VERSION_PATCHLEVEL);
 }
 
 void
@@ -118,14 +118,14 @@ small_sleep()
 {
   static struct timeval timeout;
   timeout.tv_sec = 0;
-  timeout.tv_usec = 50000;	/* 0.05 secs */
+  timeout.tv_usec = 50000;  /* 0.05 secs */
   select(0, NULL, NULL, NULL, &timeout);
 }
 
 void
 mydelay()
-     /* sleep until second changes.  works via polling.  close enough
-        for government work. */
+/* sleep until second changes.  works via polling.  close enough
+   for government work. */
 {
   static struct timeval prev;
   static struct timeval curr;
@@ -141,8 +141,8 @@ mydelay()
 
 void
 mydelay_half()
-     /* sleep until the half-second mark.  also works via polling.
-        also close enough for government work. */
+/* sleep until the half-second mark.  also works via polling.
+   also close enough for government work. */
 {
   static struct timeval curr;
   while (1) {
@@ -159,29 +159,29 @@ vtclock_print_string(WINDOW *win, int y, int x,
 {
   wclear(win); /* Fixes -v and -c mode screen over-writing */
   if (vtclock_inverse) 
-    {
-      char *p;
-      mvwin(win, y, x);
-      for (p = str; *p; ++p) {
-	if (iscntrl(*p)) {
-	  waddch(win, *p);
-	} else {
-	  waddch(win, ' ' | (isspace(*p) ? A_NORMAL : A_REVERSE));
-	}
+  {
+    char *p;
+    mvwin(win, y, x);
+    for (p = str; *p; ++p) {
+      if (iscntrl(*p)) {
+        waddch(win, *p);
+      } else {
+        waddch(win, ' ' | (isspace(*p) ? A_NORMAL : A_REVERSE));
       }
     }
+  }
   else if (vtclock_char) 
-    {
-      char *p;
-      mvwin(win, y, x);
-      for (p = str; *p; ++p) {
-	waddch(win, iscntrl(*p) ? *p : isspace(*p) ? *p : vtclock_char);
-      }
+  {
+    char *p;
+    mvwin(win, y, x);
+    for (p = str; *p; ++p) {
+      waddch(win, iscntrl(*p) ? *p : isspace(*p) ? *p : vtclock_char);
     }
+  }
   else 
-    {
-      mvwprintw(win, y, x, "%s", str);
-    }
+  {
+    mvwprintw(win, y, x, "%s", str);
+  }
 }
 
 void
@@ -202,21 +202,21 @@ vtclock_print_blank_version_of_string(WINDOW *win, int y, int x, char *str)
 void
 usage() {
   fprintf(stdout,
-	  "usage: vtclock [option ...]\n"
-	  "  -h         help\n"
-	  "  -b/-B      turn bouncing on/off                             (default on)\n"
-	  "  -d <secs>  delay between each bounce step                   (default 30 secs)\n"
-	  "  -1/-2/-3/-4/-5  select a font                               (default font #1)\n"
-	  "  -c <char>  use specified character for font drawing\n"
-	  "  -v         use bright solid inverse-video blocks\n"
-	  "  -C/-V      use normal font drawing characters               (default)\n"
-	  "  -k/-K      blinking colons on/off                           (default off)\n"
-	  "  -f <file>  shows one line at a time from filename\n"
-	  "  -p <cmd>   shows one line at a time from output of command  (via /bin/sh -c)\n"
-	  "  -D <secs>  delay between each message line                  (default 5 secs)\n"
-	  "  -F <font>  use a figlet font\n"
-	  "  -F -       use default figlet font\n"
-          );
+          "usage: vtclock [option ...]\n"
+          "  -h         help\n"
+          "  -b/-B      turn bouncing on/off                             (default on)\n"
+          "  -d <secs>  delay between each bounce step                   (default 30 secs)\n"
+          "  -1/-2/-3/-4/-5  select a font                               (default font #1)\n"
+          "  -c <char>  use specified character for font drawing\n"
+          "  -v         use bright solid inverse-video blocks\n"
+          "  -C/-V      use normal font drawing characters               (default)\n"
+          "  -k/-K      blinking colons on/off                           (default off)\n"
+          "  -f <file>  shows one line at a time from filename\n"
+          "  -p <cmd>   shows one line at a time from output of command  (via /bin/sh -c)\n"
+          "  -D <secs>  delay between each message line                  (default 5 secs)\n"
+          "  -F <font>  use a figlet font\n"
+          "  -F -       use default figlet font\n"
+    );
   version();
 }
 
@@ -224,7 +224,7 @@ int
 main(int argc, char **argv) {
   WINDOW *cl;                   /* used to draw the clock */
   WINDOW *h1, *h2, *m1, *m2, *s1, *s2, *c1, *c2;
-                                /* subcomponents of cl */
+  /* subcomponents of cl */
   WINDOW *cld;                  /* used to erase the clock */
 
   vtclock_config *config = &vtclock_config_2;
@@ -253,7 +253,7 @@ main(int argc, char **argv) {
   WINDOW *msgw = NULL;
 
   struct figlet_options the_figlet_options = {
-    font_name: NULL
+  font_name: NULL
   };
 
   {
@@ -270,21 +270,21 @@ main(int argc, char **argv) {
         usage();
         exit(0);
       case 'c':
-	vtclock_inverse = 0;
-	vtclock_char = optarg[0];
-	break;
+        vtclock_inverse = 0;
+        vtclock_char = optarg[0];
+        break;
       case 'C':
-	vtclock_inverse = 0;
-	vtclock_char = 0;
-	break;
+        vtclock_inverse = 0;
+        vtclock_char = 0;
+        break;
       case 'v':
-	vtclock_inverse = 1;
-	vtclock_char = 0;
-	break;
+        vtclock_inverse = 1;
+        vtclock_char = 0;
+        break;
       case 'V':
-	vtclock_inverse = 0;
-	vtclock_char = 0;
-	break;
+        vtclock_inverse = 0;
+        vtclock_char = 0;
+        break;
       case 'b':
         vtclock_bounce = 1;
         break;
@@ -313,40 +313,40 @@ main(int argc, char **argv) {
         config = &vtclock_config_4;
         break;
       case 'F':
-	if (optarg) {
-	  if (!strcmp(optarg, "-")) {
-	    if (the_figlet_options.font_name) {
-	      free(the_figlet_options.font_name);
-	      the_figlet_options.font_name = NULL;
-	    }
-	  } else {
-	    the_figlet_options.font_name = strdup(optarg);
-	  }
-	}
-	temp_config = generate_figlet_config(&the_figlet_options);
-	if (temp_config)
-	  config = temp_config;
-	break;
+        if (optarg) {
+          if (!strcmp(optarg, "-")) {
+            if (the_figlet_options.font_name) {
+              free(the_figlet_options.font_name);
+              the_figlet_options.font_name = NULL;
+            }
+          } else {
+            the_figlet_options.font_name = strdup(optarg);
+          }
+        }
+        temp_config = generate_figlet_config(&the_figlet_options);
+        if (temp_config)
+          config = temp_config;
+        break;
       case 'k':
-	blinking_colons = 1;
-	break;
+        blinking_colons = 1;
+        break;
       case 'K':
-	blinking_colons = 0;
-	break;
+        blinking_colons = 0;
+        break;
       case 'f':
-	show_message_line = 1;
-	msg_from_pipe = 0;
-	if (msg_filename != NULL)
-	  free(msg_filename);
-	msg_filename = strdup(optarg);
-	break;
+        show_message_line = 1;
+        msg_from_pipe = 0;
+        if (msg_filename != NULL)
+          free(msg_filename);
+        msg_filename = strdup(optarg);
+        break;
       case 'p':
-	show_message_line = 1;
-	msg_from_pipe = 1;
-	if (msg_filename != NULL)
-	  free(msg_filename);
-	msg_filename = strdup(optarg);
-	break;
+        show_message_line = 1;
+        msg_from_pipe = 1;
+        if (msg_filename != NULL)
+          free(msg_filename);
+        msg_filename = strdup(optarg);
+        break;
       case '?':
       default:
         usage();
@@ -436,10 +436,10 @@ main(int argc, char **argv) {
     if (show_message_line) {
       char *msg = get_next_message();
       if (msg != NULL) {
-	/* clear the line */
-	mvwprintw(msgw, 0, 0, "%*s", cl_width, "");
-	/* display the new message */
-	mvwprintw(msgw, 0, (cl_width - strlen(msg)) / 2, "%s", msg);
+        /* clear the line */
+        mvwprintw(msgw, 0, 0, "%*s", cl_width, "");
+        /* display the new message */
+        mvwprintw(msgw, 0, (cl_width - strlen(msg)) / 2, "%s", msg);
       }
     }
     
@@ -452,21 +452,21 @@ main(int argc, char **argv) {
         /* bouncy bouncy */
         futurex = x + leftright;
         futurey = y + updown;
-	if ((futurex == 0) && (futurey == 0)) {
-	  futurex = x + (leftright *= -1);
-	  futurey = y + (updown *= -1);
-	} else {
-	  if ((futurex < 0) || (futurex > (COLS - cl_width))) {
-	    futurex = x + (leftright *= -1);
-	  }
-	  if ((futurey < 0) || (futurey > (LINES - cl_height))) {
-	    futurey = y + (updown *= -1);
-	  }
-	}
+        if ((futurex == 0) && (futurey == 0)) {
+          futurex = x + (leftright *= -1);
+          futurey = y + (updown *= -1);
+        } else {
+          if ((futurex < 0) || (futurex > (COLS - cl_width))) {
+            futurex = x + (leftright *= -1);
+          }
+          if ((futurey < 0) || (futurey > (LINES - cl_height))) {
+            futurey = y + (updown *= -1);
+          }
+        }
         x = futurex;
         y = futurey;
 
-	waitfor = 0;
+        waitfor = 0;
       }
     }
 
@@ -497,8 +497,8 @@ pollkey(void)
   int key;
   key = wgetch(curscr);
   switch (key) {
-  case 12:			/* Control-L */
-  case 18:			/* Control-R */
+  case 12:      /* Control-L */
+  case 18:      /* Control-R */
   case KEY_REFRESH:
     redrawwin(curscr);
     wrefresh(curscr);
