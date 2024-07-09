@@ -431,6 +431,15 @@ main(int argc, char **argv) {
     DRAW_DIGIT(s2, second, tm_time->tm_sec % 10);
     DRAW_COLON(c1, colon1);
     DRAW_COLON(c2, colon2);
+
+    /* when bouncing, don't move the clock on :00s */
+    if (vtclock_bounce) {
+      if (tm_time->tm_sec != 0) {
+        ++waitfor;
+      }
+    } else {
+      ++waitfor;
+    }
     
     if (show_message_line) {
       char *msg = get_next_message();
@@ -483,7 +492,6 @@ main(int argc, char **argv) {
     }
 
     mydelay();
-    ++waitfor;
   }
 
   endwin();
