@@ -420,6 +420,8 @@ main(int argc, char **argv) {
 
   curs_set(0);
 
+  gettimeofday(&curr, NULL);
+
   while (1) {
     tm_time = localtime(&(curr.tv_sec));
 
