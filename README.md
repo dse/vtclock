@@ -18,6 +18,12 @@ It has lots of fancy display options.
     make
     sudo make install
 
+# Installation
+
+On MacOS, `vtclock` is availeble via homebrew.
+
+    brew install vtclock
+
 # More Information
 
 - http://webonastick.com/vtclock/
